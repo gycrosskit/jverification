@@ -105,8 +105,8 @@ Kuikly 宿主在原生模块工厂中用该 service 创建 `GycJVerificationModu
 
 | 产物 | 拟定坐标 / 渠道 |
 | --- | --- |
-| KMP | `com.github.gycrosskit.jverification:jverification-core:0.1.0` |
-| Kuikly | `com.github.gycrosskit.jverification:jverification-kuikly:0.1.0` |
+| KMP | `com.github.gycrosskit.jverification:jverification-core:0.1.1` |
+| Kuikly | `com.github.gycrosskit.jverification:jverification-kuikly:0.1.1` |
 | Swift | 根 `GycJVerificationNative.podspec`，Git Tag 消费；未上传 CocoaPods Specs |
 | HAR | `@gycrosskit/jverification-native@0.1.0`，拟发布 ohpm |
 
