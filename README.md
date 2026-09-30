@@ -2,7 +2,7 @@
 
 封装 Android、iOS、鸿蒙 JVerification 的初始化、预取号、授权 Token 与释放。用户同意、AppKey、应用登记、授权页品牌样式及 Token 后端换票由宿主负责；本库不创建账号、不保存 Token、不输出 SDK content。
 
-**当前是本地首版开发代码，版本拟定为 `0.1.0`，尚未创建远程仓库或发布到 JitPack、CocoaPods、ohpm。以下远程坐标是发布规划，不能当作已可下载版本。**
+Maven `0.1.1` 已发布：[GitHub Release](https://github.com/gycrosskit/jverification/releases/tag/0.1.1)，JitPack 状态 `ok`，独立消费的Android、iOS arm64/x64 编译、iOS Simulator Framework 链接、OHOS 编译通过。 HAR `0.1.0` 已提交 OHPM 审核，尚未上架；GitHub Release HAR 已远程下载、SHA-256 校验、安装到独立工程并 assembleHar 成功。OHPM 不支持此 HAR URL 直接依赖，验收使用下载缓存的 file 依赖，不计为 Registry 安装验收。
 
 ## 目录与平台
 
@@ -101,14 +101,14 @@ service.close();
 
 Kuikly 宿主在原生模块工厂中用该 service 创建 `GycJVerificationModule`，名称与 Kotlin `JVerificationModule.NAME` 相同；Kotlin client 注入宿主页面 dispatcher。桥接的 `{ event: "opened" }` 使用持续回调，终结消息才解绑；宿主消费同一个 client 的 `opened`。销毁页面前关闭 client 并 `module.dispose()`；原生 `onDestroy()` 也释放 SDK owner。AppKey 与 UIContext 从原生工厂注入，不通过 JSON 传品牌对象。
 
-## 发布规划
+## 发布渠道
 
-| 产物 | 拟定坐标 / 渠道 |
+| 产物 | 坐标 / 渠道 |
 | --- | --- |
 | KMP | `com.github.gycrosskit.jverification:jverification-core:0.1.1` |
 | Kuikly | `com.github.gycrosskit.jverification:jverification-kuikly:0.1.1` |
 | Swift | 根 `GycJVerificationNative.podspec`，Git Tag 消费；未上传 CocoaPods Specs |
-| HAR | `@gycrosskit/jverification-native@0.1.0`，拟发布 ohpm |
+| HAR | `@gycrosskit/jverification-native@0.1.0`，OHPM 审核中 |
 
 全平台 Maven 产物在 macOS 构建，再通过同 Tag 的 GitHub Release 归档供 JitPack 安装，不在仓库自建 Maven。`jitpack-install.sh` / `jitpack-metadata.py` 从组织 `.github/templates/` 同步；metadata 修复限定本库路径。`release-checksums.txt` 没有当前 Tag 的真实 SHA-256 时会在下载前失败，不能填写假校验值。
 
@@ -118,6 +118,6 @@ Kuikly 宿主在原生模块工厂中用该 service 创建 `GycJVerificationModu
 
 执行入口见 `scripts/verify.sh`。JVM 检查同意门控、只预取号、并发、撤销和迟到 Token、超时、关闭及 Token 输出脱敏，另检查 opened 去重、与终结结果的顺序及取消后的迟到通知；鸿蒙行为替身检查真实 ArkTS 服务与模块相同边界；CocoaPods 验证官方 SDK 的实际编译与链接。验证记录见 `verification/结果.md`。
 
-本地编译/打包不代表已完成真机运营商认证。发布前需用三端登记应用与 SIM 卡验证成功、拒绝、返回、超时、旋转/销毁及撤销同意；核对宿主采集策略、品牌 UI 和后端换票。远程 JitPack/ohpm 消费尚未执行。
+本地编译/打包不代表已完成真机运营商认证。发布前需用三端登记应用与 SIM 卡验证成功、拒绝、返回、超时、旋转/销毁及撤销同意；核对宿主采集策略、品牌 UI 和后端换票。远程 JitPack 和 GitHub Release HAR 产物消费已通过；OHPM Registry 安装待上架后验收。
 
 SDK 流程依据：[极光认证流程](https://docs.jiguang.cn/jverification/guideline/jver_process)、[Android API](https://docs.jiguang.cn/jverification/client/android_api)、[iOS API](https://docs.jiguang.cn/jverification/client/ios_api)、[鸿蒙 API](https://docs.jiguang.cn/jverification/client/harmonyos_api)。
