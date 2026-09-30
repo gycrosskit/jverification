@@ -1,0 +1,4 @@
+{
+ "name":"jverification-consumer", "version":"0.1.0", "main":"Index.ets",
+ "dependencies": {"@gycrosskit/jverification-native":"file:../../ohos/jverification-native/build/default/outputs/default/JVerificationNative.har"}
+}

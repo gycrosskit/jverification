@@ -1,0 +1,10 @@
+{
+ "name": "@gycrosskit/jverification-native",
+ "version": "0.1.0",
+ "description": "极光一键认证原生服务及 Kuikly 桥接",
+ "main": "Index.ets",
+ "author": "gycrosskit",
+ "repository": "https://github.com/gycrosskit/jverification",
+ "license": "Apache-2.0",
+ "dependencies": {"@jg/verify":"1.2.2", "@kuikly-open/render":"2.28.0"}
+}

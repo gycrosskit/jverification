@@ -1,0 +1,7 @@
+{
+  "module": {
+    "name": "JVerificationNative",
+    "type": "har",
+    "deviceTypes": ["default", "tablet"]
+  }
+}

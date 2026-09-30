@@ -1,0 +1,7 @@
+{
+  "module": {
+    "name": "JVerificationConsumer",
+    "type": "har",
+    "deviceTypes": ["default", "tablet"]
+  }
+}
