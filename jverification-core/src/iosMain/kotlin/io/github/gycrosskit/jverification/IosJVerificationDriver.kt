@@ -4,14 +4,14 @@ package io.github.gycrosskit.jverification
 class IosJVerificationDriver(
     private val initializeNative: ((Int, String?, String?) -> Unit) -> Unit,
     private val preLoginNative: ((Int, String?, String?) -> Unit) -> Unit,
-    private val authenticateNative: ((Int, String?, String?) -> Unit) -> Unit,
+    private val authenticateNative: (() -> Unit, (Int, String?, String?) -> Unit) -> Unit,
     private val cancelNative: () -> Unit,
     private val clearCacheNative: () -> Unit,
     private val closeNative: () -> Unit,
 ) : JVerificationDriver {
     override fun initialize(callback: (VerificationResult) -> Unit) = initializeNative(reply(callback, false))
     override fun preLogin(callback: (VerificationResult) -> Unit) = preLoginNative(reply(callback, false))
-    override fun authenticate(callback: (VerificationResult) -> Unit) = authenticateNative(reply(callback, true))
+    override fun authenticate(opened: () -> Unit, callback: (VerificationResult) -> Unit) = authenticateNative(opened, reply(callback, true))
     override fun cancel() = cancelNative()
     override fun clearPreLoginCache() = clearCacheNative()
     override fun close() = closeNative()

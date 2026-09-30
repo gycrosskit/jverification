@@ -93,7 +93,7 @@ public final class JVerificationNativeClient {
     }
 
     /** 原生直接使用时先 initialize/prepare；KMP client 自动先调用 initialize。 */
-    public func authenticate(consentGranted: Bool, completion: @escaping Completion) {
+    public func authenticate(consentGranted: Bool, opened: @escaping () -> Void = {}, completion: @escaping Completion) {
         precondition(Thread.isMainThread)
         if !consentGranted { revokeConsent(); completion(reply(-10)); return }
         guard let attempt = begin(timeout: 120, completion: completion) else { return }
@@ -103,6 +103,7 @@ public final class JVerificationNativeClient {
         }
         JVERIFICATIONService.customUI(with: uiConfig())
         loginActive = true
+        var didOpen = false
         JVERIFICATIONService.getAuthorizationWith(controller, hide: true, animated: true,
             timeout: 15_000, completion: { [weak self] result in
                 DispatchQueue.main.async {
@@ -114,7 +115,14 @@ public final class JVerificationNativeClient {
                         token: code == 6000 && token?.isEmpty == false ? token : nil,
                         carrier: result["operator"] as? String), attempt: attempt)
                 }
-            }, actionBlock: { _, _ in })
+            }, actionBlock: { [weak self] type, _ in
+                DispatchQueue.main.async {
+                    guard let self = self, !self.closed, self.consent, self.generation == attempt,
+                          self.pending != nil, self.loginActive else { return }
+                    if type == 1 { self.loginActive = false }
+                    if type == 2 && !didOpen { didOpen = true; opened() }
+                }
+            })
     }
 
     public func cancel() {

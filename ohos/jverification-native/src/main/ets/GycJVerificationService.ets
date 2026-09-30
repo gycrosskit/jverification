@@ -75,7 +75,7 @@ export class GycJVerificationService {
     });
   }
 
-  async authenticate(consentGranted: boolean): Promise<GycVerificationReply> {
+  async authenticate(consentGranted: boolean, opened: () => void = () => {}): Promise<GycVerificationReply> {
     if (!consentGranted) { this.revokeConsent(); return this.reply('CONSENT_REQUIRED'); }
     const expected = this.generation + 1;
     const result = await this.initialize(true);
@@ -91,6 +91,12 @@ export class GycJVerificationService {
       settings.autoFinish = true;
       settings.timeout = 15_000;
       this.loginActive = true;
+      let didOpen: boolean = false;
+      settings.authPageEventListener = (event: number): void => {
+        if (!this.current(attempt) || !this.loginActive) return;
+        if (event === 1) this.loginActive = false;
+        if (event === 2 && !didOpen) { didOpen = true; opened(); }
+      };
       return new Promise<GycVerificationReply>((resolve) => {
         SDK.loginAuth(settings, (code: number, content: string, carrier: string) => {
           if (!this.current(attempt)) return;

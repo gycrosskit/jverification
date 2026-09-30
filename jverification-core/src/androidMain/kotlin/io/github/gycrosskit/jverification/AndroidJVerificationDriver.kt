@@ -7,6 +7,7 @@ import cn.jiguang.verifysdk.api.JVerificationConfig
 import cn.jiguang.verifysdk.api.JVerificationInterface as SDK
 import cn.jiguang.verifysdk.api.JVerifyUIConfig
 import cn.jiguang.verifysdk.api.LoginSettings
+import cn.jiguang.verifysdk.api.AuthPageEventListener
 import cn.jiguang.verifysdk.api.RequestCallback
 
 /** Activity 和授权页配置由宿主提供；构造函数不初始化 SDK。 */
@@ -65,7 +66,7 @@ class AndroidJVerificationDriver(
         } }
     }
 
-    override fun authenticate(callback: (VerificationResult) -> Unit) {
+    override fun authenticate(opened: () -> Unit, callback: (VerificationResult) -> Unit) {
         if (!claim(callback)) return
         if (activity.isFinishing || activity.isDestroyed || !SDK.checkVerifyEnable(activity)) {
             callback(VerificationResult(VerificationStatus.UNSUPPORTED)); return
@@ -73,9 +74,23 @@ class AndroidJVerificationDriver(
         val attempt = generation
         SDK.setCustomUIWithConfig(uiConfig())
         loginActive = true
-        val settings = LoginSettings().apply { setAutoFinish(true); setTimeout(15_000) }
+        var didOpen = false
+        var finished = false
+        val settings = LoginSettings().apply {
+            setAutoFinish(true)
+            setTimeout(15_000)
+            setAuthPageEventListener(object : AuthPageEventListener() {
+                override fun onEvent(cmd: Int, msg: String?) { main.post {
+                    if (!closed && attempt == generation && !finished && loginActive) {
+                        if (cmd == 1) loginActive = false
+                        if (cmd == 2 && !didOpen) { didOpen = true; opened() }
+                    }
+                } }
+            })
+        }
         SDK.loginAuth(activity, settings) { code, content, carrier, _ -> main.post {
-            if (!closed && attempt == generation) {
+            if (!closed && attempt == generation && !finished) {
+                finished = true
                 loginActive = false
                 val status = when {
                     code == 6000 && !content.isNullOrBlank() -> VerificationStatus.TOKEN

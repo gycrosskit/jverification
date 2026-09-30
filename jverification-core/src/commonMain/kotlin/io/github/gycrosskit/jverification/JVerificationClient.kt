@@ -8,6 +8,8 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 
 enum class VerificationStatus {
     READY, TOKEN, CONSENT_REQUIRED, CANCELED, TIMEOUT, BUSY, CLOSED, UNSUPPORTED, FAILED
@@ -30,7 +32,7 @@ class VerificationResult(
 interface JVerificationDriver {
     fun initialize(callback: (VerificationResult) -> Unit)
     fun preLogin(callback: (VerificationResult) -> Unit)
-    fun authenticate(callback: (VerificationResult) -> Unit)
+    fun authenticate(opened: () -> Unit = {}, callback: (VerificationResult) -> Unit)
     fun cancel()
     fun clearPreLoginCache()
     fun close()
@@ -53,9 +55,11 @@ class JVerificationClient(
 
     suspend fun prepare(consentGranted: Boolean): VerificationResult = perform(consentGranted, false)
 
-    suspend fun authenticate(consentGranted: Boolean): VerificationResult = perform(consentGranted, true)
+    /** SDK 确认授权页打开后通知一次；通知在 client dispatcher 执行，不结束认证。 */
+    suspend fun authenticate(consentGranted: Boolean, opened: () -> Unit = {}): VerificationResult =
+        perform(consentGranted, true, opened)
 
-    private suspend fun perform(granted: Boolean, login: Boolean): VerificationResult = withContext(dispatcher) {
+    private suspend fun perform(granted: Boolean, login: Boolean, opened: () -> Unit = {}): VerificationResult = withContext(dispatcher) {
         if (closed) return@withContext VerificationResult(VerificationStatus.CLOSED)
         if (!granted) {
             revokeConsent()
@@ -66,12 +70,13 @@ class JVerificationClient(
         busy = true
         val attempt = generation
         try {
-            val initialized = await(prepareTimeoutMillis, driver::initialize)
+            val initialized = await(prepareTimeoutMillis) { _, reply -> driver.initialize(reply) }
             if (initialized.status != VerificationStatus.READY) return@withContext initialized
             if (!consent || generation != attempt) return@withContext VerificationResult(VerificationStatus.CANCELED)
             // 预取号不会拉起授权页；认证也不会偷偷改变宿主的同意状态。
-            val result = await(if (login) authenticationTimeoutMillis else prepareTimeoutMillis,
-                if (login) driver::authenticate else driver::preLogin)
+            val result = await(if (login) authenticationTimeoutMillis else prepareTimeoutMillis, opened) { onOpened, reply ->
+                if (login) driver.authenticate(onOpened, reply) else driver.preLogin(reply)
+            }
             // Token 回调已完成、协程尚未恢复时也可能撤销同意，不能返回旧凭据。
             if (closed || !consent || generation != attempt) VerificationResult(VerificationStatus.CANCELED) else result
         } catch (_: TimeoutCancellationException) {
@@ -89,12 +94,24 @@ class JVerificationClient(
         }
     }
 
-    private suspend fun await(timeout: Long, start: ((VerificationResult) -> Unit) -> Unit): VerificationResult {
+    private suspend fun await(
+        timeout: Long,
+        opened: () -> Unit = {},
+        start: (() -> Unit, (VerificationResult) -> Unit) -> Unit,
+    ): VerificationResult = coroutineScope {
         val reply = CompletableDeferred<VerificationResult>()
         pending = reply
+        val attempt = generation
+        var didOpen = false
         try {
-            return withTimeout(timeout) {
-                start { reply.complete(it) }
+            withTimeout(timeout) {
+                // 事件和结果按同一 dispatcher 排队，SDK 连续发 opened/Token 时不丢打开通知。
+                start({ launch {
+                    if (reply.isActive && !didOpen && !closed && consent && generation == attempt) {
+                        didOpen = true
+                        opened()
+                    }
+                } }, { result -> launch { reply.complete(result) } })
                 reply.await()
             }
         } finally {

@@ -14,8 +14,8 @@ func makeJVerificationDriver(_ native: JVerificationNativeClient) -> IosJVerific
                 _ = callback(KotlinInt(int: Int32(result.code)), result.token, result.carrier)
             }
         },
-        authenticateNative: { callback in
-            native.authenticate(consentGranted: true) { result in
+        authenticateNative: { opened, callback in
+            native.authenticate(consentGranted: true, opened: { _ = opened() }) { result in
                 _ = callback(KotlinInt(int: Int32(result.code)), result.token, result.carrier)
             }
         },

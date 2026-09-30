@@ -9,6 +9,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class JVerificationClientTest {
@@ -18,9 +19,10 @@ class JVerificationClientTest {
         var preCalls = 0
         var cleared = false
         var reply: ((VerificationResult) -> Unit)? = null
+        var opened: (() -> Unit)? = null
         override fun initialize(callback: (VerificationResult) -> Unit) { initCalls++; callback(VerificationResult(VerificationStatus.READY)) }
         override fun preLogin(callback: (VerificationResult) -> Unit) { preCalls++; callback(VerificationResult(VerificationStatus.READY)) }
-        override fun authenticate(callback: (VerificationResult) -> Unit) { authCalls++; reply = callback }
+        override fun authenticate(opened: () -> Unit, callback: (VerificationResult) -> Unit) { authCalls++; this.opened = opened; reply = callback }
         override fun cancel() {}
         override fun clearPreLoginCache() { cleared = true }
         override fun close() {}
@@ -49,8 +51,13 @@ class JVerificationClientTest {
     }
 
     @Test fun timeoutAndRedaction() = runTest {
-        val client = JVerificationClient(Driver(), StandardTestDispatcher(testScheduler), authenticationTimeoutMillis = 10)
-        assertEquals(VerificationStatus.TIMEOUT, client.authenticate(true).status)
+        val driver = Driver()
+        val client = JVerificationClient(driver, StandardTestDispatcher(testScheduler), authenticationTimeoutMillis = 10)
+        var opened = 0
+        assertEquals(VerificationStatus.TIMEOUT, client.authenticate(true) { opened++ }.status)
+        driver.opened?.invoke()
+        runCurrent()
+        assertEquals(0, opened)
         assertFalse(VerificationResult(VerificationStatus.TOKEN, 6000, "secret").toString().contains("secret"))
     }
 
@@ -67,5 +74,61 @@ class JVerificationClientTest {
         job.join()
         assertEquals(VerificationStatus.CANCELED, result?.status)
         assertNull(result?.token)
+    }
+
+    @Test fun openedOnceBeforeEachFinalResult() = runTest {
+        val driver = Driver()
+        val client = JVerificationClient(driver, StandardTestDispatcher(testScheduler))
+        assertEquals(VerificationStatus.READY, client.prepare(true).status)
+        assertNull(driver.opened)
+        for (status in listOf(VerificationStatus.TOKEN, VerificationStatus.CANCELED, VerificationStatus.FAILED)) {
+            val events = mutableListOf<String>()
+            val job = launch {
+                events += client.authenticate(true) { events += "opened" }.status.name
+            }
+            runCurrent()
+            assertTrue(events.isEmpty())
+            driver.opened?.invoke()
+            driver.opened?.invoke()
+            runCurrent()
+            assertEquals(listOf("opened"), events)
+            assertTrue(job.isActive)
+            driver.reply?.invoke(VerificationResult(status, token = "secret".takeIf { status == VerificationStatus.TOKEN }))
+            job.join()
+            driver.opened?.invoke()
+            runCurrent()
+            assertEquals(listOf("opened", status.name), events)
+        }
+        // SDK 连续通知打开和结果时仍保留顺序，且拉页失败不能伪造 opened。
+        val events = mutableListOf<String>()
+        val tokenJob = launch { events += client.authenticate(true) { events += "opened" }.status.name }
+        runCurrent()
+        driver.opened?.invoke()
+        driver.reply?.invoke(VerificationResult(VerificationStatus.TOKEN, token = "secret"))
+        tokenJob.join()
+        assertEquals(listOf("opened", "TOKEN"), events)
+        val failedJob = launch { events += client.authenticate(true) { events += "unexpected" }.status.name }
+        runCurrent()
+        driver.reply?.invoke(VerificationResult(VerificationStatus.FAILED))
+        failedJob.join()
+        assertEquals(listOf("opened", "TOKEN", "FAILED"), events)
+    }
+
+    @Test fun queuedAndLateOpenedInvalidAfterCancelRevokeAndClose() = runTest {
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        val driver = Driver()
+        val client = JVerificationClient(driver, dispatcher)
+        var opened = 0
+        for (stop in listOf<suspend () -> Unit>({ client.cancel() }, { client.revokeConsent() }, { client.close() })) {
+            val job = launch { assertEquals(VerificationStatus.CANCELED, client.authenticate(true) { opened++ }.status) }
+            runCurrent()
+            val oldOpened = driver.opened
+            oldOpened?.invoke()
+            launch(dispatcher, start = CoroutineStart.UNDISPATCHED) { stop() }.join()
+            job.join()
+            oldOpened?.invoke()
+            runCurrent()
+            assertEquals(0, opened)
+        }
     }
 }

@@ -4,3 +4,6 @@ export function service(context: common.ApplicationContext, key: string, ui: UIC
  return new GycJVerificationService(context, key, () => ui, stack, () => config);
 }
 export function module(service: GycJVerificationService): GycJVerificationModule { return new GycJVerificationModule(service); }
+export async function authenticate(service: GycJVerificationService, opened: () => void): Promise<string> {
+ return (await service.authenticate(true, opened)).status;
+}

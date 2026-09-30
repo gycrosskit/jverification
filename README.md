@@ -23,7 +23,7 @@ Android 最低 API 24，iOS 最低 15.0；HAR 兼容 API 22。Kotlin 使用鸿�
 ```kotlin
 val client = JVerificationClient(driver)
 val preloaded = client.prepare(consentGranted = hostConsent)
-val result = client.authenticate(consentGranted = hostConsent)
+val result = client.authenticate(consentGranted = hostConsent, opened = { hostHideLoading() })
 when (result.status) {
     VerificationStatus.TOKEN -> result.token?.let { hostExchangeToken(it) }
     VerificationStatus.CANCELED -> Unit
@@ -39,6 +39,8 @@ client.close()
 
 - `prepare(false)` / `authenticate(false)` 不初始化 SDK，并撤销已有请求。
 - `prepare(true)` 初始化后只预取号，不拉授权页；认证前不强制预取号成功。
+- `opened` 仅在 SDK 授权页打开事件（Android/HarmonyOS `authPageEventListener(2)`、iOS `actionBlock(2)`）后通知一次；在 client dispatcher 执行。调用前、预取号和拉页失败不会通知；通知不结束认证，仍等待 Token、取消或失败。宿主在此撤下 loading，组件不持有宿主 UI 状态。
+- 取消、撤销同意、超时、关闭和 Kuikly `dispose()` 后的迟到 opened 无效；SDK 页面关闭事件（1）后也不再接收打开事件。
 - 初始化和预取号默认各等待 10 秒；整个授权交互默认最多 120 秒。SDK 拉页/取 Token 超时为 15 秒。交互时间可通过 client 参数调整。
 - 同一个 client 的并发请求返回 `BUSY`。原生适配限制同一进程同时只有一个 SDK owner，避免多个页面互相关授权页。
 - 取消/撤销/超时使旧回调失效；底层初始化未必可取消，因此不能把页面等待超时当作 SDK 已停止，也不会在 SDK 仍初始化时重复初始化。
@@ -76,7 +78,7 @@ let native = JVerificationNativeClient(
 )
 native.prepare(consentGranted: hostConsent) { result in /* 宿主状态 */ }
 // 原生直接调用前应先 initialize / prepare，成功后再授权。
-native.authenticate(consentGranted: hostConsent) { result in
+native.authenticate(consentGranted: hostConsent, opened: { hostHideLoading() }) { result in
     if result.code == 6000, let token = result.token { hostExchangeToken(token) }
 }
 native.revokeConsent()
@@ -93,11 +95,11 @@ const service = new GycJVerificationService(
   () => hostUIContext, hostNavPathStack, () => hostJVerifyUIConfig
 );
 await service.prepare(hostConsent);
-const result = await service.authenticate(hostConsent);
+const result = await service.authenticate(hostConsent, () => hostHideLoading());
 service.close();
 ```
 
-Kuikly 宿主在原生模块工厂中用该 service 创建 `GycJVerificationModule`，名称与 Kotlin `JVerificationModule.NAME` 相同；Kotlin client 注入宿主页面 dispatcher。销毁页面前关闭 client 并 `module.dispose()`；原生 `onDestroy()` 也释放 SDK owner。AppKey 与 UIContext 从原生工厂注入，不通过 JSON 传品牌对象。
+Kuikly 宿主在原生模块工厂中用该 service 创建 `GycJVerificationModule`，名称与 Kotlin `JVerificationModule.NAME` 相同；Kotlin client 注入宿主页面 dispatcher。桥接的 `{ event: "opened" }` 使用持续回调，终结消息才解绑；宿主消费同一个 client 的 `opened`。销毁页面前关闭 client 并 `module.dispose()`；原生 `onDestroy()` 也释放 SDK owner。AppKey 与 UIContext 从原生工厂注入，不通过 JSON 传品牌对象。
 
 ## 发布规划
 
@@ -110,12 +112,12 @@ Kuikly 宿主在原生模块工厂中用该 service 创建 `GycJVerificationModu
 
 全平台 Maven 产物在 macOS 构建，再通过同 Tag 的 GitHub Release 归档供 JitPack 安装，不在仓库自建 Maven。`jitpack-install.sh` / `jitpack-metadata.py` 从组织 `.github/templates/` 同步；metadata 修复限定本库路径。`release-checksums.txt` 没有当前 Tag 的真实 SHA-256 时会在下载前失败，不能填写假校验值。
 
-本地构建暂用 `io.github.gycrosskit:jverification-core:0.1.0` 与 Kuikly 同组坐标，独立消费工程只读取 `build/maven`，不依赖源码替换。
+默认构建使用上表正式坐标。独立消费工程默认从 JitPack 解析；本地验证添加 `-PlocalArtifacts=true` 时只从 `build/maven` 读取本库产物，不依赖源码替换。远程发布后，移除此参数即可验证远程产物。
 
 ## 验证
 
-执行入口见 `scripts/verify.sh`。JVM 检查同意门控、只预取号、并发、撤销和迟到 Token、超时、关闭及 Token 输出脱敏；鸿蒙行为替身检查真实 ArkTS 服务相同边界；CocoaPods 验证官方 SDK 的实际编译与链接。验证记录见 `verification/结果.md`。
+执行入口见 `scripts/verify.sh`。JVM 检查同意门控、只预取号、并发、撤销和迟到 Token、超时、关闭及 Token 输出脱敏，另检查 opened 去重、与终结结果的顺序及取消后的迟到通知；鸿蒙行为替身检查真实 ArkTS 服务与模块相同边界；CocoaPods 验证官方 SDK 的实际编译与链接。验证记录见 `verification/结果.md`。
 
 本地编译/打包不代表已完成真机运营商认证。发布前需用三端登记应用与 SIM 卡验证成功、拒绝、返回、超时、旋转/销毁及撤销同意；核对宿主采集策略、品牌 UI 和后端换票。远程 JitPack/ohpm 消费尚未执行。
 
-SDK 流程依据：[极光认证流程](https://docs.jiguang.cn/jverification/guideline/jver_process)、[Android API](https://docs.jiguang.cn/jverification/client/android_api)、[鸿蒙 API](https://docs.jiguang.cn/jverification/client/harmonyos_api)。
+SDK 流程依据：[极光认证流程](https://docs.jiguang.cn/jverification/guideline/jver_process)、[Android API](https://docs.jiguang.cn/jverification/client/android_api)、[iOS API](https://docs.jiguang.cn/jverification/client/ios_api)、[鸿蒙 API](https://docs.jiguang.cn/jverification/client/harmonyos_api)。

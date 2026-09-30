@@ -12,7 +12,7 @@ const sdk = {
   checkVerifyEnable() { return new Promise(resolve => checks.push(resolve)); },
   prelogin(callback) { preCalls++; callback(7000); },
   setCustomUIWithConfig() {},
-  loginAuth(_, callback) { logins.push(callback); },
+  loginAuth(settings, callback) { logins.push({ callback, event: settings.authPageEventListener }); },
   dismissLoginAuthActivity() { dismissed++; },
   clearPreLoginCache() { cleared++; },
 };
@@ -54,18 +54,85 @@ const make = () => new Service({}, 'host-key', () => ({}), {}, () => ({}));
   const ready = service.prepare(true); await settle(); checks.shift()(true);
   assert.equal((await ready).status, 'READY');
   assert.equal(logins.length, 0);
-  const auth = service.authenticate(true); await settle(); checks.shift()(true); await settle();
+  let lateOpened = 0;
+  const auth = service.authenticate(true, () => lateOpened++); await settle(); checks.shift()(true); await settle();
   const stale = logins.shift();
   service.revokeConsent();
   assert.equal((await auth).status, 'CANCELED');
-  stale(6000, 'secret-token', 'carrier'); await settle();
+  stale.event(2); stale.callback(6000, 'secret-token', 'carrier'); await settle();
   assert.equal(dismissed, 1);
-  const timeout = service.authenticate(true); await settle(); checks.shift()(true); await settle();
+  assert.equal(lateOpened, 0);
+  for (const code of [6000, 6002, 6001]) {
+    const events = [];
+    const result = service.authenticate(true, () => events.push('opened'));
+    await settle(); checks.shift()(true); await settle();
+    const login = logins.shift();
+    assert.deepEqual(events, []);
+    login.event(3); login.event(2); login.event(2);
+    assert.deepEqual(events, ['opened']);
+    let completed = false; result.then(() => completed = true); await settle();
+    assert.equal(completed, false);
+    login.callback(code, 'secret-token', 'carrier');
+    events.push((await result).status); login.event(2);
+    assert.deepEqual(events, ['opened', code === 6000 ? 'TOKEN' : code === 6002 ? 'CANCELED' : 'FAILED']);
+  }
+  const failedEvents = [];
+  const failure = service.authenticate(true, () => failedEvents.push('opened'));
+  await settle(); checks.shift()(true); await settle();
+  const failedLogin = logins.shift();
+  failedLogin.callback(6001, '', 'carrier');
+  assert.equal((await failure).status, 'FAILED'); failedLogin.event(2);
+  assert.deepEqual(failedEvents, []);
+  const closedPage = service.authenticate(true, () => failedEvents.push('opened'));
+  await settle(); checks.shift()(true); await settle();
+  const closedLogin = logins.shift();
+  closedLogin.event(1); closedLogin.event(2); closedLogin.callback(6002, '', '');
+  assert.equal((await closedPage).status, 'CANCELED');
+  assert.deepEqual(failedEvents, []);
+  const timeout = service.authenticate(true, () => failedEvents.push('opened')); await settle(); checks.shift()(true); await settle();
   [...timers.values()][0]();
   assert.equal((await timeout).status, 'TIMEOUT');
+  logins.shift().event(2);
+  assert.deepEqual(failedEvents, []);
+  const closing = service.authenticate(true, () => failedEvents.push('opened'));
+  await settle(); checks.shift()(true); await settle();
+  const closeLogin = logins.shift();
   service.close();
+  assert.equal((await closing).status, 'CANCELED'); closeLogin.event(2);
+  assert.deepEqual(failedEvents, []);
   assert.equal((await service.prepare(true)).status, 'CLOSED');
   assert.equal(timers.size, 0);
   assert.ok(cleared > 0);
-  console.log('OHOS consent, unique owner, preload-only, revoke, late callbacks, timeout and close passed');
+  const moduleSource = fs.readFileSync(path.join(__dirname, '../ohos/jverification-native/src/main/ets/GycJVerificationModule.ets'), 'utf8');
+  const moduleExports = {};
+  vm.runInNewContext(ts.transpileModule(moduleSource, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText, {
+    exports: moduleExports,
+    require(name) {
+      if (name === '@kuikly-open/render') return { KuiklyRenderBaseModule: class { onDestroy() {} } };
+      if (name === './GycJVerificationService') return exportsObject;
+      throw Error(name);
+    }, Promise, JSON,
+  });
+  const bridge = new moduleExports.GycJVerificationModule(make());
+  const messages = [];
+  bridge.call('authenticate', '{"consentGranted":true}', reply => messages.push(reply.event || reply.status));
+  await settle(); checks.shift()(true); await settle();
+  const bridgeLogin = logins.shift();
+  bridgeLogin.event(2); bridgeLogin.event(2);
+  assert.deepEqual(messages, ['opened']);
+  bridgeLogin.callback(6000, 'secret-token', 'carrier'); await settle();
+  assert.deepEqual(messages, ['opened', 'TOKEN']);
+  bridgeLogin.event(2); assert.deepEqual(messages, ['opened', 'TOKEN']);
+  bridge.call('authenticate', '{"consentGranted":true}', reply => messages.push(reply.event || reply.status));
+  await settle(); checks.shift()(true); await settle();
+  const detached = logins.shift();
+  bridge.call('cancel', '{}', null); detached.event(2); detached.callback(6000, 'secret-token', 'carrier');
+  await settle(); assert.deepEqual(messages, ['opened', 'TOKEN']);
+  bridge.call('authenticate', '{"consentGranted":true}', reply => messages.push(reply.event || reply.status));
+  await settle(); checks.shift()(true); await settle();
+  const destroyed = logins.shift(); bridge.onDestroy(); destroyed.event(2);
+  destroyed.callback(6000, 'secret-token', 'carrier'); await settle();
+  assert.deepEqual(messages, ['opened', 'TOKEN']);
+  assert.equal(timers.size, 0);
+  console.log('OHOS consent, owner, opened once, final-result order, failed launch, late events, timeout and close passed');
 })().catch(error => { console.error(error); process.exitCode = 1; });

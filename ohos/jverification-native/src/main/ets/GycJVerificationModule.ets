@@ -7,23 +7,30 @@ interface VerificationParams { consentGranted?: boolean; }
 export class GycJVerificationModule extends KuiklyRenderBaseModule {
   static readonly MODULE_NAME: string = 'GycJVerificationModule';
   private destroyed: boolean = false;
+  private generation: number = 0;
   private service: GycJVerificationService;
   constructor(service: GycJVerificationService) { super(); this.service = service; }
   syncMode(): boolean { return false; }
 
   call(method: string, params: KRAny, callback: KuiklyRenderCallback | null): KRAny {
     if (this.destroyed) return null;
-    this.perform(method, params).then((reply: GycVerificationReply) => {
-      if (!this.destroyed) callback?.(reply);
-    }).catch(() => { if (!this.destroyed) callback?.({ status: 'FAILED', code: -1 }); });
+    if (method === 'cancel' || method === 'clearCache' || method === 'close') this.generation++;
+    const attempt = this.generation;
+    const deliver = (reply: GycVerificationReply): void => {
+      if (!this.destroyed && attempt === this.generation) callback?.(reply);
+    };
+    this.perform(method, params, () => {
+      if (!this.destroyed && attempt === this.generation) callback?.({ event: 'opened' });
+    }).then(deliver)
+      .catch(() => deliver({ status: 'FAILED', code: -1 }));
     return null;
   }
 
-  private async perform(method: string, params: KRAny): Promise<GycVerificationReply> {
+  private async perform(method: string, params: KRAny, opened: () => void): Promise<GycVerificationReply> {
     const args = JSON.parse(typeof params === 'string' ? params : '{}') as VerificationParams;
     if (method === 'initialize') return this.service.initialize(args.consentGranted === true);
     if (method === 'preLogin') return this.service.preLogin();
-    if (method === 'authenticate') return this.service.authenticate(args.consentGranted === true);
+    if (method === 'authenticate') return this.service.authenticate(args.consentGranted === true, opened);
     if (method === 'cancel') this.service.cancel();
     else if (method === 'clearCache') this.service.revokeConsent();
     else if (method === 'close') this.service.close();

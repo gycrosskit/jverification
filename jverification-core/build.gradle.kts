@@ -20,7 +20,6 @@ kotlin {
             api("cn.jiguang.sdk:jverification:3.4.8")
             implementation("cn.jiguang.sdk:jcore:5.5.6")
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2-1.0.0")
-            
         }
         commonTest.dependencies {
             implementation(kotlin("test"))
