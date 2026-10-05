@@ -2,6 +2,8 @@
 
 封装 Android、iOS 和 HarmonyOS 极光一键认证的初始化、预取号、授权 Token 与释放。用户同意、AppKey、应用登记、授权页样式及 Token 后端换票由宿主负责；组件不创建账号、不保存 Token、不返回厂商 SDK content。
 
+当前 Maven 候选 **0.1.2**：统一 `close()` / `dispose()` 的释放入口，避免重复关闭原生授权页；补充取消、迟到回调和重复关闭回归及公共 API 注释，并补齐 Maven 发布元数据校验。**发布准备中，完成远程验收后更新**。iOS Git Pod 继续使用 `0.1.1`（Podspec 内部版本 `0.1.0`），HAR 继续使用 `@gycrosskit/jverification-native@0.1.0`；各渠道分别验收，OHPM Registry 可安装性尚未确认。
+
 ## 平台与产物
 
 | 产物 | 平台 / 要求 |
@@ -115,7 +117,7 @@ dependencyResolutionManagement {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("com.github.gycrosskit.jverification:jverification-core:0.1.1")
+            implementation("com.github.gycrosskit.jverification:jverification-core:0.1.2")
         }
     }
 }

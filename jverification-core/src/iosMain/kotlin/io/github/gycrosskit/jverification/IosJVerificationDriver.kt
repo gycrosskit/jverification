@@ -1,6 +1,8 @@
 package io.github.gycrosskit.jverification
 
-/** Swift 原生包不依赖某个应用的 Shared.framework，宿主用闭包连接两种产物。 */
+/** Swift 原生包不依赖某个应用的 Shared.framework，宿主用闭包连接两种产物。
+ *
+ Native 闭包须遵守 Swift 主线程/生命周期契约；整数码映射统一结果，非 TOKEN 丢弃凭据。 */
 class IosJVerificationDriver(
     private val initializeNative: ((Int, String?, String?) -> Unit) -> Unit,
     private val preLoginNative: ((Int, String?, String?) -> Unit) -> Unit,

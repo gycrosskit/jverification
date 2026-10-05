@@ -5,13 +5,16 @@ interface VerificationParams { consentGranted?: boolean; }
 
 /** 不传 AppKey、UIContext 或 Token 到日志；原生配置通过宿主模块工厂注入。 */
 export class GycJVerificationModule extends KuiklyRenderBaseModule {
+  /** Kuikly 注册名，与 Kotlin 侧常量一致。 */
   static readonly MODULE_NAME: string = 'GycJVerificationModule';
   private destroyed: boolean = false;
   private generation: number = 0;
   private service: GycJVerificationService;
+  /** 宿主注入品牌配置后的服务；页面销毁将关闭此服务。 */
   constructor(service: GycJVerificationService) { super(); this.service = service; }
   syncMode(): boolean { return false; }
 
+  /** 页面线程异步入口；销毁后忽略请求与迟到回调，参数 JSON 属于输入边界。 */
   call(method: string, params: KRAny, callback: KuiklyRenderCallback | null): KRAny {
     if (this.destroyed) return null;
     if (method === 'cancel' || method === 'clearCache' || method === 'close') this.generation++;

@@ -1,10 +1,15 @@
 import { common } from '@kit.AbilityKit';
 import { JVerificationInterface as SDK, JVerificationLoginSettings, JVerifyUIConfig } from '@jg/verify';
 
+/** 归一 SDK 回执；只在 TOKEN 携带敏感凭据，不记录日志或持久化。 */
 export interface GycVerificationReply {
+  /** READY 是准备成功；TOKEN 才能向宿主后端换票。 */
   status: string;
+  /** 厂商整数码；组件自产结果默认 0。 */
   code: number;
+  /** 短期敏感换票凭据，失败或取消时省略。 */
   token?: string;
+  /** 可选运营商标识，不证明业务身份。 */
   carrier?: string;
 }
 
@@ -26,6 +31,7 @@ export class GycJVerificationService {
   private stack: NavPathStack;
   private uiConfig: () => JVerifyUIConfig;
   private configureBeforeInit: () => void;
+  /** UI 线程使用；AppKey 非空，宿主提供导航栈、可用 UIContext、品牌 UI 和 SDK 初始化前配置。 */
   constructor(context: common.ApplicationContext, appKey: string,
     uiContext: () => UIContext, stack: NavPathStack,
     uiConfig: () => JVerifyUIConfig, configureBeforeInit: () => void = () => {}) {
@@ -34,6 +40,7 @@ export class GycJVerificationService {
     this.stack = stack; this.uiConfig = uiConfig; this.configureBeforeInit = configureBeforeInit;
   }
 
+  /** 明确同意后初始化，等待最多 10000 毫秒；底层 init 未结束前不会重复初始化。 */
   async initialize(consentGranted: boolean): Promise<GycVerificationReply> {
     if (!consentGranted) { this.revokeConsent(); return this.reply('CONSENT_REQUIRED'); }
     this.consent = true;
@@ -56,6 +63,7 @@ export class GycJVerificationService {
     });
   }
 
+  /** 初始化并预取号，不展示授权页；撤销发生在两个阶段之间也取消后续操作。 */
   async prepare(consentGranted: boolean): Promise<GycVerificationReply> {
     const expected = this.generation + 1;
     const result = await this.initialize(consentGranted);
@@ -64,6 +72,7 @@ export class GycJVerificationService {
     return this.preLogin();
   }
 
+  /** 同意之后预取号，等待最多 10000 毫秒。 */
   async preLogin(): Promise<GycVerificationReply> {
     if (!this.consent) return this.reply('CONSENT_REQUIRED');
     return this.perform(10_000, async (attempt: number): Promise<GycVerificationReply> => {
@@ -75,6 +84,7 @@ export class GycJVerificationService {
     });
   }
 
+  /** 初始化后打开授权页；opened 仅通知一次，最长等待 120000 毫秒，Token 为终态。 */
   async authenticate(consentGranted: boolean, opened: () => void = () => {}): Promise<GycVerificationReply> {
     if (!consentGranted) { this.revokeConsent(); return this.reply('CONSENT_REQUIRED'); }
     const expected = this.generation + 1;
@@ -109,6 +119,7 @@ export class GycJVerificationService {
     });
   }
 
+  /** 结束本地等待并撤销迟到事件；仅关闭本实例拥有的授权页。 */
   cancel(): void {
     this.generation++;
     if (this.timer !== -1) clearTimeout(this.timer);
@@ -119,8 +130,11 @@ export class GycJVerificationService {
     resolve?.(this.reply('CANCELED'));
   }
 
+  /** 仅清除当前进程 owner 的预取号缓存。 */
   clearPreLoginCache(): void { if (GycJVerificationService.owner === this) SDK.clearPreLoginCache(); }
+  /** 撤销同意，取消等待并清空预取号缓存。 */
   revokeConsent(): void { this.consent = false; this.cancel(); this.clearPreLoginCache(); }
+  /** 永久关闭并释放进程所有权；不可重开。 */
   close(): void {
     this.closed = true; this.revokeConsent();
     if (GycJVerificationService.owner === this) GycJVerificationService.owner = null;
