@@ -2,7 +2,7 @@
 
 封装 Android、iOS 和 HarmonyOS 极光一键认证的初始化、预取号、授权 Token 与释放。用户同意、AppKey、应用登记、授权页样式及 Token 后端换票由宿主负责；组件不创建账号、不保存 Token、不返回厂商 SDK content。
 
-当前 Maven / Git Pod 候选 **0.1.3**：Swift拒绝6000回包中的纯空白token，与KMP保持一致，合法凭据保留原文。Podspec内部版本同步0.1.3，HAR保持0.1.0。**未发布，待新候选构建与真实远程核验**。旧Maven0.1.2、Git Pod0.1.1的历史验收不代算此次修复；详见[完整源码审查](docs/完整源码审查.md)。
+当前 Maven / Git Pod 固定版本 **0.1.3**：Swift拒绝6000回包中的纯空白token，与KMP保持一致，合法凭据保留原文。Podspec内部版本同步0.1.3，HAR保持0.1.0。**已发布，新 Git Pod 全源码/厂商 SDK/App 链接及精确远程文件核验通过，Maven新目录最终消费通过，结果见完整审查**。旧Maven0.1.2、Git Pod0.1.1的历史验收不代算此次修复；详见[完整源码审查](docs/完整源码审查.md)。
 
 ## 平台与产物
 
@@ -136,7 +136,7 @@ pod 'GycJVerificationNative',
 ohpm install @gycrosskit/jverification-native@0.1.0
 ```
 
-新候选 Git Tag 与 Podspec 内部版本均为 `0.1.3`，尚未发布；旧0.1.1内部Pod版本0.1.0保持历史记录。各渠道分别版本化；插件仓库、iOS 闭包接线与 Kuikly 双侧注册见[接入指南](docs/接入指南.md)。
+Git Tag 与 Podspec 内部版本均为已发布 `0.1.3`；旧0.1.1内部Pod版本0.1.0保持历史记录。各渠道分别版本化；插件仓库、iOS 闭包接线与 Kuikly 双侧注册见[接入指南](docs/接入指南.md)。
 
 ## 快速使用
 
