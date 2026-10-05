@@ -122,7 +122,7 @@ public final class JVerificationNativeClient {
                     let code = (result["code"] as? NSNumber)?.intValue ?? -1
                     let token = result["loginToken"] as? String
                     self.finish(JVerificationReply(code: code,
-                        token: code == 6000 && token?.isEmpty == false ? token : nil,
+                        token: code == 6000 && token?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false ? token : nil,
                         carrier: result["operator"] as? String), attempt: attempt)
                 }
             }, actionBlock: { [weak self] type, _ in
