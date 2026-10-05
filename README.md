@@ -2,7 +2,7 @@
 
 封装 Android、iOS 和 HarmonyOS 极光一键认证的初始化、预取号、授权 Token 与释放。用户同意、AppKey、应用登记、授权页样式及 Token 后端换票由宿主负责；组件不创建账号、不保存 Token、不返回厂商 SDK content。
 
-当前 Maven **0.1.2**：统一 `close()` / `dispose()` 的释放入口，避免重复关闭原生授权页；补充取消、迟到回调和重复关闭回归及公共 API 注释，并补齐 Maven 发布元数据校验。**已发布；JitPack、公开产物校验与干净远程消费通过**。iOS Git Pod 继续使用 `0.1.1`（Podspec 内部版本 `0.1.0`），HAR 继续使用 `@gycrosskit/jverification-native@0.1.0`；各渠道分别验收，OHPM Registry 可安装性尚未确认。
+当前 Maven / Git Pod 候选 **0.1.3**：Swift拒绝6000回包中的纯空白token，与KMP保持一致，合法凭据保留原文。Podspec内部版本同步0.1.3，HAR保持0.1.0。**未发布，待新候选构建与真实远程核验**。旧Maven0.1.2、Git Pod0.1.1的历史验收不代算此次修复；详见[完整源码审查](docs/完整源码审查.md)。
 
 ## 平台与产物
 
@@ -117,7 +117,7 @@ dependencyResolutionManagement {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("com.github.gycrosskit.jverification:jverification-core:0.1.2")
+            implementation("com.github.gycrosskit.jverification:jverification-core:0.1.3")
         }
     }
 }
@@ -129,14 +129,14 @@ kotlin {
 # iOS Podfile：未上传 CocoaPods Specs，使用 Git 源。
 pod 'GycJVerificationNative',
     :git => 'https://github.com/gycrosskit/jverification.git',
-    :tag => '0.1.1'
+    :tag => '0.1.3'
 ```
 
 ```sh
 ohpm install @gycrosskit/jverification-native@0.1.0
 ```
 
-Git Tag `0.1.1` 中 Podspec 内部版本仍为 `0.1.0`。各渠道分别版本化；插件仓库、iOS 闭包接线与 Kuikly 双侧注册见[接入指南](docs/接入指南.md)。
+新候选 Git Tag 与 Podspec 内部版本均为 `0.1.3`，尚未发布；旧0.1.1内部Pod版本0.1.0保持历史记录。各渠道分别版本化；插件仓库、iOS 闭包接线与 Kuikly 双侧注册见[接入指南](docs/接入指南.md)。
 
 ## 快速使用
 
