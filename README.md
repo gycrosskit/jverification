@@ -2,7 +2,7 @@
 
 封装 Android、iOS 和 HarmonyOS 极光一键认证的初始化、预取号、授权 Token 与释放。用户同意、AppKey、应用登记、授权页样式及 Token 后端换票由宿主负责；组件不创建账号、不保存 Token、不返回厂商 SDK content。
 
-当前 Maven 候选 **0.1.2**：统一 `close()` / `dispose()` 的释放入口，避免重复关闭原生授权页；补充取消、迟到回调和重复关闭回归及公共 API 注释，并补齐 Maven 发布元数据校验。**发布准备中，完成远程验收后更新**。iOS Git Pod 继续使用 `0.1.1`（Podspec 内部版本 `0.1.0`），HAR 继续使用 `@gycrosskit/jverification-native@0.1.0`；各渠道分别验收，OHPM Registry 可安装性尚未确认。
+当前 Maven **0.1.2**：统一 `close()` / `dispose()` 的释放入口，避免重复关闭原生授权页；补充取消、迟到回调和重复关闭回归及公共 API 注释，并补齐 Maven 发布元数据校验。**已发布；JitPack、公开产物校验与干净远程消费通过**。iOS Git Pod 继续使用 `0.1.1`（Podspec 内部版本 `0.1.0`），HAR 继续使用 `@gycrosskit/jverification-native@0.1.0`；各渠道分别验收，OHPM Registry 可安装性尚未确认。
 
 ## 平台与产物
 
@@ -185,3 +185,11 @@ when (result.status) {
 已有记录覆盖远程 Maven / OHPM 产物消费、iOS Simulator Framework 链接、Swift SDK 编译和行为替身测试。真实 SIM/运营商认证、授权页、采集策略与后端换票仍需宿主验收。
 
 自有源码使用 [Apache-2.0](LICENSE)。极光 SDK 通过 Maven、CocoaPods、OHPM 依赖引入，遵循厂商许可；仓库不复制 SDK 二进制。
+
+## 0.1.2 本轮测试与远程验收
+
+2026-10-05：本轮自有源码和公开 API 审查、关键回归与受影响平台编译通过；真实 JitPack `0.1.2` 的最终标签提交、9 个 publications 的 POM/Module、所有变体文件大小与四种声明哈希、内部精确版本及 available-at 均通过。Release Maven 归档重新下载 SHA-256 为 `1514c9290fa7ba02bf82e1b59c8ace43d4481d0fa30ff20bb5b1169c9f66349a`。公开 MD5/SHA-1 sidecar 通过；SHA-256/SHA-512 sidecar 的 HTTP 404 记录为渠道缺失。
+
+干净消费工程使用固定远程版本，没有本地 Maven、includeBuild 或其他组件源码替代；通过现有入口的 Android/iOS / OHOS / JVM 编译和相应最终链接。 JitPack 顶层 component.url 改写地址返回404，实际变体/available-at与真实消费者正常；未创建伪坐标掩盖此字段。
+
+完整回归范围、精简原则、注释契约与仍需设备/业务验收的边界见 [14 个功能组件测试与 API 审查](https://github.com/gycrosskit/.github/blob/main/docs/组件测试与API审查.md)。源码测试与远程消费不代替真机和厂商业务验收。
