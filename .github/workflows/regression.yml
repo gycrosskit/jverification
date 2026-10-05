@@ -20,10 +20,11 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: '22'
+      - run: npm install --prefix "$RUNNER_TEMP/contract-tools" --ignore-scripts --no-audit --no-fund typescript@5.9.3
       - run: |
           python3 verification/test-check-maven.py
           python3 verification/test-jitpack-metadata.py
-          node verification/ohos-behavior.cjs
+          TYPESCRIPT_PATH="$RUNNER_TEMP/contract-tools/node_modules/typescript" node verification/ohos-behavior.cjs
   android:
     runs-on: ubuntu-24.04
     timeout-minutes: 45
