@@ -36,7 +36,7 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - run: bash gradlew :jverification-core:jvmTest :jverification-core:testDebugUnitTest :jverification-core:compileReleaseKotlinAndroid --no-daemon --max-workers=1 --stacktrace
+      - run: bash gradlew --init-script "$PWD/scripts/ci-repositories.gradle" :jverification-core:jvmTest :jverification-core:testDebugUnitTest :jverification-core:compileReleaseKotlinAndroid --no-daemon --max-workers=1 --stacktrace
   native:
     runs-on: macos-15
     timeout-minutes: 60
@@ -49,4 +49,4 @@ jobs:
           distribution: temurin
           java-version: '17'
       - run: bash verification/swift-callbacks/verify.sh
-      - run: bash gradlew :jverification-core:iosSimulatorArm64Test :jverification-core:compileKotlinIosArm64 :jverification-core:compileKotlinIosX64 :jverification-core:compileKotlinOhosArm64 :jverification-kuikly:compileKotlinOhosArm64 --no-daemon --max-workers=1 --stacktrace
+      - run: bash gradlew --init-script "$PWD/scripts/ci-repositories.gradle" :jverification-core:iosSimulatorArm64Test :jverification-core:compileKotlinIosArm64 :jverification-core:compileKotlinIosX64 :jverification-core:compileKotlinOhosArm64 :jverification-kuikly:compileKotlinOhosArm64 --no-daemon --max-workers=1 --stacktrace

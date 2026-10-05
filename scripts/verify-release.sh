@@ -15,7 +15,11 @@ import sys, tarfile
 from pathlib import Path
 root = Path(sys.argv[2]); root.mkdir()
 with tarfile.open(sys.argv[1]) as archive:
-    archive.extractall(root, filter="data")
+    for entry in archive.getmembers():
+        target = (root / entry.name).resolve()
+        if root.resolve() not in target.parents or not (entry.isfile() or entry.isdir()):
+            raise ValueError(f"Unsafe archive member: {entry.name}")
+    archive.extractall(root)
 PYTHON
 python3 verification/check-maven.py "$output/maven" com.github.gycrosskit.jverification "$VERSION" jverification-core,jverification-kuikly ios_arm64,ios_x64,ios_simulator_arm64,ohos_arm64
 # 消费方只使用 JitPack；归档校验不会安装到 MavenLocal 或替代远程解析。
