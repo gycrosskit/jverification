@@ -1,15 +1,21 @@
 import Foundation
 import UIKit
 
+/// 厂商回执；description 仅保留 code，token 不写日志或持久化。
 public struct JVerificationReply: CustomStringConvertible {
+    /// 厂商结果码或组件负值：同意 -10、忙 -11、关闭 -12、不支持 -13、超时 -14。
     public let code: Int
+    /// 6000 成功时的短期敏感换票凭据；交给宿主后端，其他结果为 nil。
     public let token: String?
+    /// 厂商运营商标识，可为空，不代表登录身份。
     public let carrier: String?
+    /// 脱敏日志说明，不包含 token 或 carrier。
     public var description: String { "JVerificationReply(code=\(code))" }
 }
 
-/** 主线程、进程唯一实例。Token 交给宿主后端，不写日志、不持久化。 */
+/// 主线程、进程唯一实例。Token 交给宿主后端，不写日志、不持久化。
 public final class JVerificationNativeClient {
+    /// Main 上的唯一结果回调。
     public typealias Completion = (JVerificationReply) -> Void
     private static weak var owner: JVerificationNativeClient?
     private static var initializedKey: String?
@@ -29,6 +35,7 @@ public final class JVerificationNativeClient {
     private var loginActive = false
     private let waiterID = UUID()
 
+    /// Main 使用；宿主提供可见 presenter、品牌 UI 和首次初始化前的采集开关。production 由发布环境决定。
     public init(appKey: String, production: Bool,
                 presenter: @escaping () -> UIViewController?,
                 uiConfig: @escaping () -> JVUIConfig,
@@ -41,6 +48,7 @@ public final class JVerificationNativeClient {
         self.configureBeforeInit = configureBeforeInit
     }
 
+    /// 明确同意后初始化并预取号；不展示授权页。
     public func prepare(consentGranted: Bool, completion: @escaping Completion) {
         initialize(consentGranted: consentGranted) { [weak self] result in
             if result.code == 0 || result.code == 8000 { self?.preLogin(completion: completion) }
@@ -48,6 +56,7 @@ public final class JVerificationNativeClient {
         }
     }
 
+    /// 同意之后初始化 SDK；拒绝同意会取消等待并清除缓存，最长等待 10 秒。
     public func initialize(consentGranted: Bool, completion: @escaping Completion) {
         precondition(Thread.isMainThread)
         if !consentGranted { revokeConsent(); completion(reply(-10)); return }
@@ -79,6 +88,7 @@ public final class JVerificationNativeClient {
         JVERIFICATIONService.setup(with: config)
     }
 
+    /// 同意与初始化已成功时预取号；不展示页面，最长等待 10 秒。
     public func preLogin(completion: @escaping Completion) {
         guard let attempt = begin(timeout: 10, completion: completion) else { return }
         guard consent && Self.initialized && JVERIFICATIONService.checkVerifyEnable() else {
@@ -92,7 +102,7 @@ public final class JVerificationNativeClient {
         }
     }
 
-    /** 原生直接使用时先 initialize/prepare；KMP client 自动先调用 initialize。 */
+    /// Main 调用；先 initialize/prepare，授权最多等待 120 秒，opened 仅通知一次且不结束等待。
     public func authenticate(consentGranted: Bool, opened: @escaping () -> Void = {}, completion: @escaping Completion) {
         precondition(Thread.isMainThread)
         if !consentGranted { revokeConsent(); completion(reply(-10)); return }
@@ -125,6 +135,7 @@ public final class JVerificationNativeClient {
             })
     }
 
+    /// Main 上终止等待、取消定时器并关闭本实例授权页；迟到 SDK 结果不会再交付。
     public func cancel() {
         precondition(Thread.isMainThread)
         generation += 1
@@ -138,12 +149,15 @@ public final class JVerificationNativeClient {
         callback?(reply(6002))
     }
 
+    /// Main 上仅清除本实例拥有的进程 SDK 缓存。
     public func clearPreLoginCache() {
         precondition(Thread.isMainThread)
         if Self.owner === self { JVERIFICATIONService.clearPreLoginCache() }
     }
 
+    /// Main 撤销同意、取消等待并清空预取号缓存。
     public func revokeConsent() { consent = false; cancel(); clearPreLoginCache() }
+    /// Main 永久关闭并让出进程所有权；不可重开。
     public func close() {
         precondition(Thread.isMainThread)
         closed = true; revokeConsent()

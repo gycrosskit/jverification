@@ -10,7 +10,12 @@ import cn.jiguang.verifysdk.api.LoginSettings
 import cn.jiguang.verifysdk.api.AuthPageEventListener
 import cn.jiguang.verifysdk.api.RequestCallback
 
-/** Activity 和授权页配置由宿主提供；构造函数不初始化 SDK。 */
+/** Activity 和授权页配置由宿主提供；构造函数不初始化 SDK。
+ *
+ * 在 Main 使用；宿主应在 Activity 结束时关闭 client，实例保持同一 AppKey 的进程 SDK 所有权。
+ * @param uiConfig 每次认证使用宿主品牌授权页配置。
+ * @param configureBeforeInit SDK 首次初始化前配置隐私采集开关；默认不做额外配置。
+ */
 class AndroidJVerificationDriver(
     private val activity: Activity,
     private val appKey: String,

@@ -19,7 +19,7 @@ class JVerificationModule : Module(), JVerificationDriver {
     override fun authenticate(opened: () -> Unit, callback: (VerificationResult) -> Unit) = invoke("authenticate", callback, opened)
     override fun cancel() { generation++; send("cancel"); disposeCallbacks() }
     override fun clearPreLoginCache() = send("clearCache")
-    override fun close() { send("close"); dispose() }
+    override fun close() = dispose()
 
     private fun invoke(method: String, callback: (VerificationResult) -> Unit, opened: () -> Unit = {}) {
         if (disposed) { callback(VerificationResult(VerificationStatus.CLOSED)); return }
@@ -48,6 +48,10 @@ class JVerificationModule : Module(), JVerificationDriver {
 
     private fun send(method: String) { if (!disposed) toNative(false, method, "{}", null, false) }
     private fun disposeCallbacks() { callbacks.toList().forEach(::removeCallback); callbacks.clear() }
+    /** 终止页面桥，发送一次关闭并撤销全部回调；与 close 共用幂等入口。 */
     fun dispose() { if (!disposed) { generation++; send("close"); disposed = true; disposeCallbacks() } }
-    companion object { const val NAME = "GycJVerificationModule" }
+    companion object {
+        /** 与原生模块注册名保持一致。 */
+        const val NAME = "GycJVerificationModule"
+    }
 }

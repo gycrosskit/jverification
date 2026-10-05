@@ -17,15 +17,40 @@ class JVerificationClientTest {
         var initCalls = 0
         var authCalls = 0
         var preCalls = 0
+        var cancelCalls = 0
+        var closeCalls = 0
         var cleared = false
         var reply: ((VerificationResult) -> Unit)? = null
         var opened: (() -> Unit)? = null
         override fun initialize(callback: (VerificationResult) -> Unit) { initCalls++; callback(VerificationResult(VerificationStatus.READY)) }
         override fun preLogin(callback: (VerificationResult) -> Unit) { preCalls++; callback(VerificationResult(VerificationStatus.READY)) }
         override fun authenticate(opened: () -> Unit, callback: (VerificationResult) -> Unit) { authCalls++; this.opened = opened; reply = callback }
-        override fun cancel() {}
+        override fun cancel() { cancelCalls++ }
         override fun clearPreLoginCache() { cleared = true }
-        override fun close() {}
+        override fun close() { closeCalls++ }
+    }
+
+    @Test fun coroutineCancellationReleasesBusyAndRejectsPriorAttemptCallbacks() = runTest {
+        val driver = Driver()
+        val client = JVerificationClient(driver, StandardTestDispatcher(testScheduler))
+        val canceled = launch { client.authenticate(true) }
+        runCurrent()
+        val oldReply = driver.reply
+        canceled.cancel()
+        canceled.join()
+        assertEquals(1, driver.cancelCalls)
+        var result: VerificationResult? = null
+        val retry = launch { result = client.authenticate(true) }
+        runCurrent()
+        oldReply?.invoke(VerificationResult(VerificationStatus.TOKEN, token = "old-secret"))
+        runCurrent()
+        assertTrue(retry.isActive)
+        driver.reply?.invoke(VerificationResult(VerificationStatus.TOKEN, token = "new-secret"))
+        retry.join()
+        assertEquals("new-secret", result?.token)
+        client.close()
+        client.close()
+        assertEquals(1, driver.closeCalls)
     }
 
     @Test fun consentPreloadAndRevocation() = runTest {

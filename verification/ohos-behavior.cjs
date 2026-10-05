@@ -134,5 +134,18 @@ const make = () => new Service({}, 'host-key', () => ({}), {}, () => ({}));
   destroyed.callback(6000, 'secret-token', 'carrier'); await settle();
   assert.deepEqual(messages, ['opened', 'TOKEN']);
   assert.equal(timers.size, 0);
+  // 参数解析失败不应触发 SDK；明确 false/非 Boolean 的同意均不能开始认证。
+  const malformed = new moduleExports.GycJVerificationModule(make());
+  const malformedReplies = [];
+  const loginCount = logins.length;
+  malformed.call('authenticate', '{bad', reply => malformedReplies.push(reply.status));
+  malformed.call('authenticate', '{"consentGranted":1}', reply => malformedReplies.push(reply.status));
+  await settle();
+  assert.ok(malformedReplies.includes('FAILED'));
+  assert.ok(malformedReplies.includes('CONSENT_REQUIRED'));
+  assert.equal(logins.length, loginCount);
+  assert.equal(checks.length, 0);
+  malformed.onDestroy();
+  assert.equal(timers.size, 0);
   console.log('OHOS consent, owner, opened once, final-result order, failed launch, late events, timeout and close passed');
 })().catch(error => { console.error(error); process.exitCode = 1; });
