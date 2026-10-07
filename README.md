@@ -1,8 +1,10 @@
 # GY CrossKit JVerification
 
+统一候选 **0.1.4**：Swift `authenticate(true)` 与 common/OHOS 同样自动初始化，撤销同意后可重新同意授权；复用已有 setup/waiter/busy/cancel 流程。真实厂商 headers 编译和回调合同通过；新远程消费与设备运营商结果待发布后验收。HAR 源码未变，配套仍为 0.1.0。
+
 封装 Android、iOS 和 HarmonyOS 极光一键认证的初始化、预取号、授权 Token 与释放。用户同意、AppKey、应用登记、授权页样式及 Token 后端换票由宿主负责；组件不创建账号、不保存 Token、不返回厂商 SDK content。
 
-当前 Maven / Git Pod 固定版本 **0.1.3**：Swift拒绝6000回包中的纯空白token，与KMP保持一致，合法凭据保留原文。Podspec内部版本同步0.1.3，HAR保持0.1.0。**已发布，新 Git Pod 全源码/厂商 SDK/App 链接及精确远程文件核验通过，Maven新目录最终消费通过，结果见完整审查**。旧Maven0.1.2、Git Pod0.1.1的历史验收不代算此次修复；详见[完整源码审查](docs/完整源码审查.md)。
+上一版 Maven / Git Pod 固定版本 **0.1.3**：Swift拒绝6000回包中的纯空白token，与KMP保持一致，合法凭据保留原文。Podspec内部版本同步0.1.3，HAR保持0.1.0。**已发布，新 Git Pod 全源码/厂商 SDK/App 链接及精确远程文件核验通过，Maven新目录最终消费通过，结果见完整审查**。旧Maven0.1.2、Git Pod0.1.1的历史验收不代算此次修复；详见[完整源码审查](docs/完整源码审查.md)。
 
 ## 平台与产物
 
@@ -174,6 +176,8 @@ when (result.status) {
 `hostConsent`、loading 和换票均为宿主逻辑。`opened` 只在 SDK 授权页真实打开事件后通知一次，通知不会结束认证；Token、取消、失败才是终结结果。拉页失败、预取号和取消后的迟到事件不会触发通知。
 
 未同意时不初始化 SDK；一进程只配置一个 AppKey，并保持一个活动 SDK owner。关闭、超时或撤销同意使旧回调失效；撤销不能卸载厂商 SDK 或撤回已发送数据。Token 仅交后端换票，宿主不要记录它。
+
+Kotlin client、Swift 原生 client 和 OHOS service 的 `authenticate(true)` 均先初始化再授权；预取号可选，CMP 与 Kuikly 宿主沿用同一原生入口和结果合同。
 
 ## 文档与支持
 

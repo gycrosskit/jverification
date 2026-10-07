@@ -102,10 +102,20 @@ public final class JVerificationNativeClient {
         }
     }
 
-    /// Main 调用；先 initialize/prepare，授权最多等待 120 秒，opened 仅通知一次且不结束等待。
+    /// Main 同意后自动初始化并授权；初始化最多 10 秒，授权最多 120 秒，opened 不结束等待。
     public func authenticate(consentGranted: Bool, opened: @escaping () -> Void = {}, completion: @escaping Completion) {
         precondition(Thread.isMainThread)
         if !consentGranted { revokeConsent(); completion(reply(-10)); return }
+        if !Self.initialized {
+            initialize(consentGranted: true) { [weak self] result in
+                guard let self else { return }
+                if result.code == 0 || result.code == 8000 {
+                    self.authenticate(consentGranted: true, opened: opened, completion: completion)
+                } else { completion(result) }
+            }
+            return
+        }
+        consent = true
         guard let attempt = begin(timeout: 120, completion: completion) else { return }
         guard consent && Self.initialized && JVERIFICATIONService.checkVerifyEnable(),
               let controller = presenter(), controller.viewIfLoaded?.window != nil else {

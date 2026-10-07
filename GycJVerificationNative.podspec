@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = 'GycJVerificationNative'
-  s.version = '0.1.3'
+  s.version = '0.1.4'
   s.summary = '极光一键认证 SDK 的同意、预取号、授权与释放边界'
   s.homepage = 'https://github.com/gycrosskit/jverification'
   s.license = { :type => 'Apache-2.0', :file => 'LICENSE' }
