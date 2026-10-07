@@ -24,6 +24,7 @@ jobs:
           node-version: '22'
       - run: npm install --prefix "$RUNNER_TEMP/contract-tools" --ignore-scripts --no-audit --no-fund typescript@5.9.3
       - run: |
+          python3 verification/ci/test_fork_host.py
           python3 verification/test-check-maven.py
           python3 verification/test-jitpack-metadata.py
           TYPESCRIPT_PATH="$RUNNER_TEMP/contract-tools/node_modules/typescript" node verification/ohos-behavior.cjs
@@ -39,6 +40,7 @@ jobs:
           distribution: temurin
           java-version: '17'
           cache: gradle
+      - run: bash scripts/ci-pin-fork-host.sh
       - run: bash gradlew --init-script "$PWD/scripts/ci-repositories.gradle" :jverification-core:jvmTest :jverification-core:testDebugUnitTest :jverification-core:compileReleaseKotlinAndroid --no-daemon --max-workers=1 --stacktrace --info
   native:
     runs-on: macos-15
@@ -53,6 +55,7 @@ jobs:
           java-version: '17'
           cache: gradle
       - run: bash verification/swift-callbacks/verify.sh
+      - run: bash scripts/ci-pin-fork-host.sh
       - run: |
           ios_test_target=iosSimulatorArm64Test
           if [[ "$(uname -m)" != arm64 ]]; then ios_test_target=iosX64Test; fi
