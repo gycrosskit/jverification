@@ -10,7 +10,8 @@ final class JVAuthConfig {
 }
 enum JVERIFICATIONService {
     static var reply: [String: Any] = [:]
-    static func setup(with config: JVAuthConfig) { config.authBlock?(["code": 8000]) }
+    static var setupCalls = 0
+    static func setup(with config: JVAuthConfig) { setupCalls += 1; config.authBlock?(["code": 8000]) }
     static func checkVerifyEnable() -> Bool { true }
     static func preLogin(_ timeout: Int, completion: ([String: Any]) -> Void) { completion(["code": 7000]) }
     static func customUI(with config: JVUIConfig) {}
