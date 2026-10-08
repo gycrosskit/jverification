@@ -22,7 +22,11 @@ kotlin {
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2-1.0.0")
         }
         // 用测试 transport 执行生产 Kuikly 模块，覆盖关闭和迟到回调。
-        jvmTest { kotlin.srcDir(rootProject.file("jverification-kuikly/src/commonMain/kotlin")) }
+        jvmTest {
+            kotlin.srcDir(rootProject.file("jverification-kuikly/src/commonMain/kotlin"))
+            // 以受控 Android/SDK 边界执行实际 driver，不复制其 owner/回调状态机。
+            kotlin.srcDir("src/androidMain/kotlin")
+        }
         commonTest.dependencies {
             implementation(kotlin("test"))
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2-1.0.0")
