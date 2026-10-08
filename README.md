@@ -1,6 +1,14 @@
 # GY CrossKit JVerification
 
-统一候选 **0.1.4**：Swift `authenticate(true)` 与 common/OHOS 同样自动初始化，撤销同意后可重新同意授权；复用已有 setup/waiter/busy/cancel 流程。真实厂商 headers 编译和回调合同通过；新远程消费与设备运营商结果待发布后验收。HAR 源码未变，配套仍为 0.1.0。
+## 当前功能与平台边界
+
+core/client及三端driver/service提供隐私门控、初始化、预取号与Token授权；无CMP或Kuikly业务UI，jverification-kuikly仅OHOS桥，授权页为厂商SDK/宿主配置。
+
+2026-10-08 源码基线 `7a284e26b110876087b55adfa5a1b9d0afcd199c` （本次仅更新文档，生产源码保持tag 0.1.4）；五入口功能矩阵、具体 OS/SDK 差异、宿主职责和验证边界见[功能与平台差异](docs/功能与平台差异.md)。下方历史版本记录只证明其注明版本与范围；当前安装示例统一使用 0.1.4。
+
+当前测试覆盖、执行时点和未验收项集中见[验证范围](docs/功能与平台差异.md#验证范围)，复现命令见[开发与验证](docs/开发与验证.md)。
+
+源码基线 tag **0.1.4**：Swift `authenticate(true)` 与 common/OHOS 同样自动初始化，撤销同意后可重新同意授权；复用已有 setup/waiter/busy/cancel 流程。该不可变预发行版本已发布，本轮不重复发布；真实厂商 headers 编译和回调合同通过，真实运营商设备业务仍未验收。HAR 源码未变，配套仍为 0.1.0。
 
 封装 Android、iOS 和 HarmonyOS 极光一键认证的初始化、预取号、授权 Token 与释放。用户同意、AppKey、应用登记、授权页样式及 Token 后端换票由宿主负责；组件不创建账号、不保存 Token、不返回厂商 SDK content。
 
@@ -119,7 +127,7 @@ dependencyResolutionManagement {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("com.github.gycrosskit.jverification:jverification-core:0.1.3")
+            implementation("com.github.gycrosskit.jverification:jverification-core:0.1.4")
         }
     }
 }
@@ -131,14 +139,14 @@ kotlin {
 # iOS Podfile：未上传 CocoaPods Specs，使用 Git 源。
 pod 'GycJVerificationNative',
     :git => 'https://github.com/gycrosskit/jverification.git',
-    :tag => '0.1.3'
+    :tag => '0.1.4'
 ```
 
 ```sh
 ohpm install @gycrosskit/jverification-native@0.1.0
 ```
 
-Git Tag 与 Podspec 内部版本均为已发布 `0.1.3`；旧0.1.1内部Pod版本0.1.0保持历史记录。各渠道分别版本化；插件仓库、iOS 闭包接线与 Kuikly 双侧注册见[接入指南](docs/接入指南.md)。
+当前 Maven、Git Tag 与 Podspec 内部版本均为已发布 `0.1.4`；旧0.1.1内部Pod版本0.1.0保持历史记录。各渠道分别版本化；插件仓库、iOS 闭包接线与 Kuikly 双侧注册见[接入指南](docs/接入指南.md)。
 
 ## 快速使用
 
