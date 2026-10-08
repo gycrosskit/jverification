@@ -12,7 +12,7 @@ core/client及三端driver/service提供隐私门控、初始化、预取号与T
 
 封装 Android、iOS 和 HarmonyOS 极光一键认证的初始化、预取号、授权 Token 与释放。用户同意、AppKey、应用登记、授权页样式及 Token 后端换票由宿主负责；组件不创建账号、不保存 Token、不返回厂商 SDK content。
 
-上一版 Maven / Git Pod 固定版本 **0.1.3**：Swift拒绝6000回包中的纯空白token，与KMP保持一致，合法凭据保留原文。Podspec内部版本同步0.1.3，HAR保持0.1.0。**已发布，新 Git Pod 全源码/厂商 SDK/App 链接及精确远程文件核验通过，Maven新目录最终消费通过，结果见完整审查**。旧Maven0.1.2、Git Pod0.1.1的历史验收不代算此次修复；详见[完整源码审查](docs/完整源码审查.md)。
+旧版本结果见[0.1.3 历史验收](verification/结果.md#013-历史验收)和[0.1.2 历史验收](verification/结果.md#012-本轮测试与远程验收)。
 
 ## 平台与产物
 
@@ -200,11 +200,7 @@ Kotlin client、Swift 原生 client 和 OHOS service 的 `authenticate(true)` �
 
 ## 0.1.2 本轮测试与远程验收
 
-2026-10-05：本轮自有源码和公开 API 审查、关键回归与受影响平台编译通过；真实 JitPack `0.1.2` 的最终标签提交、9 个 publications 的 POM/Module、所有变体文件大小与四种声明哈希、内部精确版本及 available-at 均通过。Release Maven 归档重新下载 SHA-256 为 `1514c9290fa7ba02bf82e1b59c8ace43d4481d0fa30ff20bb5b1169c9f66349a`。公开 MD5/SHA-1 sidecar 通过；SHA-256/SHA-512 sidecar 的 HTTP 404 记录为渠道缺失。
-
-干净消费工程使用固定远程版本，没有本地 Maven、includeBuild 或其他组件源码替代；通过现有入口的 Android/iOS / OHOS / JVM 编译和相应最终链接。 JitPack 顶层 component.url 改写地址返回404，实际变体/available-at与真实消费者正常；未创建伪坐标掩盖此字段。
-
-完整回归范围、精简原则、注释契约与仍需设备/业务验收的边界见 [14 个功能组件测试与 API 审查](https://github.com/gycrosskit/.github/blob/main/docs/组件测试与API审查.md)。源码测试与远程消费不代替真机和厂商业务验收。
+历史结果已收拢至[验证记录](verification/结果.md#012-本轮测试与远程验收)。
 
 ## 自动回归
 
