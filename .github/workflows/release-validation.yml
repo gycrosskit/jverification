@@ -75,7 +75,9 @@ jobs:
       - run: bash scripts/ci-pin-fork-host.sh
         timeout-minutes: 3
         if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.version != '')
-      - run: python3 scripts/ci-run.py --no-progress-seconds 300 --log ci-diagnostics/release-android.log -- bash gradlew --init-script "$PWD/scripts/ci-repositories.gradle" -p verification-consumer "-PjverificationVersion=$VERSION" compileDebugKotlinAndroid --refresh-dependencies --no-daemon --max-workers=1 --stacktrace --info
+      - run: |
+          verify_native=$(python3 -c 'import os; v=os.environ["VERSION"].split("-",1)[0]; print(str(tuple(map(int,v.split("."))) >= (0, 1, 5)).lower())')
+          python3 scripts/ci-run.py --no-progress-seconds 300 --log ci-diagnostics/release-android.log -- bash gradlew --init-script "$PWD/scripts/ci-repositories.gradle" -p verification-consumer "-PjverificationVersion=$VERSION" "-PverifyNativeModule=$verify_native" compileDebugKotlinAndroid --refresh-dependencies --no-daemon --max-workers=1 --stacktrace --info
         timeout-minutes: 35
         if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.version != '')
       - name: Explain lightweight completion
@@ -136,12 +138,25 @@ jobs:
       - run: bash scripts/ci-pin-fork-host.sh
         timeout-minutes: 3
         if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.version != '')
+      - name: Consume exact native receiver Git Pod for new releases
+        id: native-receiver
+        if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.version != '')
+        timeout-minutes: 20
+        run: |
+          verify_native=$(python3 -c 'import os; v=os.environ["VERSION"].split("-",1)[0]; print(str(tuple(map(int,v.split("."))) >= (0, 1, 5)).lower())')
+          if [[ "$verify_native" == true ]]; then
+            mkdir -p ci-diagnostics
+            render_dir=$(bash scripts/ci-build-kuikly-render.sh "$RUNNER_TEMP/kuikly-native" GycJVerificationNative/Kuikly jverification "$VERSION" 2> >(tee ci-diagnostics/release-native-kuikly-sdk.log >&2))
+            python3 verification/swift-kuikly/verify-public-api.py "$render_dir"
+            echo "framework_dir=$render_dir" >> "$GITHUB_OUTPUT"
+          fi
       - timeout-minutes: 45
         if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.version != '')
         run: |
           ios_framework_target=IosSimulatorArm64
           if [[ "$(uname -m)" != arm64 ]]; then ios_framework_target=IosX64; fi
-          python3 scripts/ci-run.py --no-progress-seconds 300 --log ci-diagnostics/release-native.log -- bash gradlew --init-script "$PWD/scripts/ci-repositories.gradle" -p verification-consumer "-PjverificationVersion=$VERSION" "linkDebugFramework$ios_framework_target" compileKotlinIosArm64 compileKotlinIosX64 compileKotlinOhosArm64 --refresh-dependencies --no-daemon --max-workers=1 --stacktrace --info
+          verify_native=$(python3 -c 'import os; v=os.environ["VERSION"].split("-",1)[0]; print(str(tuple(map(int,v.split("."))) >= (0, 1, 5)).lower())')
+          python3 scripts/ci-run.py --no-progress-seconds 300 --log ci-diagnostics/release-native.log -- bash gradlew --init-script "$PWD/scripts/ci-repositories.gradle" -p verification-consumer "-PjverificationVersion=$VERSION" "-PverifyNativeModule=$verify_native" "-PkuiklyRenderFrameworkDir=${{ steps.native-receiver.outputs.framework_dir }}" "linkDebugFramework$ios_framework_target" compileKotlinIosArm64 compileKotlinIosX64 compileKotlinOhosArm64 --refresh-dependencies --no-daemon --max-workers=1 --stacktrace --info
       - name: Explain lightweight completion
         if: ${{ !(github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.version != '')) }}
         run: echo 'No build is required for this event and scope.'

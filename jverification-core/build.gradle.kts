@@ -27,6 +27,11 @@ kotlin {
             // 以受控 Android/SDK 边界执行实际 driver，不复制其 owner/回调状态机。
             kotlin.srcDir("src/androidMain/kotlin")
         }
+        androidUnitTest.dependencies {
+            implementation("org.robolectric:robolectric:4.16.1")
+            implementation("com.tencent.kuikly-open:core-render-android:${libs.versions.kuikly.get()}")
+        }
+        androidUnitTest { kotlin.srcDir(rootProject.file("jverification-kuikly/src/androidMain/kotlin")) }
         commonTest.dependencies {
             implementation(kotlin("test"))
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2-1.0.0")
