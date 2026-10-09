@@ -118,7 +118,7 @@ jobs:
       - run: bash scripts/ci-pin-fork-host.sh
         timeout-minutes: 3
         if: needs.changes.outputs.source == 'true'
-      - run: python3 scripts/ci-run.py --no-progress-seconds 300 --log ci-diagnostics/android.log -- bash gradlew --init-script "$PWD/scripts/ci-repositories.gradle" :jverification-core:jvmTest :jverification-core:testDebugUnitTest :jverification-core:compileReleaseKotlinAndroid --no-daemon --max-workers=1 --stacktrace --info
+      - run: python3 scripts/ci-run.py --no-progress-seconds 300 --log ci-diagnostics/android.log -- bash gradlew --init-script "$PWD/scripts/ci-repositories.gradle" :jverification-core:jvmTest :jverification-core:testDebugUnitTest :jverification-core:compileReleaseKotlinAndroid :jverification-kuikly:compileReleaseKotlinAndroid --no-daemon --max-workers=1 --stacktrace --info
         timeout-minutes: 35
         if: needs.changes.outputs.source == 'true'
       - name: Explain lightweight completion
@@ -172,7 +172,7 @@ jobs:
           distribution: temurin
           java-version: '17'
           cache: gradle
-      - run: python3 scripts/ci-run.py --no-progress-seconds 300 --log ci-diagnostics/native.log -- bash verification/swift-callbacks/verify.sh
+      - run: python3 scripts/ci-run.py --no-progress-seconds 300 --log ci-diagnostics/native.log -- bash -ec 'bash verification/swift-callbacks/verify.sh; python3 verification/swift-kuikly/verify.py'
         timeout-minutes: 10
         if: needs.changes.outputs.source == 'true'
       - run: bash scripts/ci-pin-fork-host.sh
@@ -183,11 +183,16 @@ jobs:
         run: |
           ios_test_target=iosSimulatorArm64Test
           if [[ "$(uname -m)" != arm64 ]]; then ios_test_target=iosX64Test; fi
-          python3 scripts/ci-run.py --no-progress-seconds 300 --log ci-diagnostics/native.log -- bash gradlew --init-script "$PWD/scripts/ci-repositories.gradle" :jverification-core:"$ios_test_target" :jverification-core:compileKotlinIosArm64 :jverification-core:compileKotlinIosX64 :jverification-core:compileKotlinOhosArm64 :jverification-kuikly:compileKotlinOhosArm64 --no-daemon --max-workers=1 --stacktrace --info
+          python3 scripts/ci-run.py --no-progress-seconds 300 --log ci-diagnostics/native.log -- bash gradlew --init-script "$PWD/scripts/ci-repositories.gradle" :jverification-core:"$ios_test_target" :jverification-core:compileKotlinIosArm64 :jverification-core:compileKotlinIosX64 :jverification-core:compileKotlinOhosArm64 :jverification-kuikly:compileKotlinOhosArm64 :jverification-kuikly:compileKotlinIosArm64 :jverification-kuikly:compileKotlinIosX64 :jverification-kuikly:compileKotlinIosSimulatorArm64 --no-daemon --max-workers=1 --stacktrace --info
           python3 -c 'import pathlib, sys, xml.etree.ElementTree as ET; files=pathlib.Path(".").glob("**/build/test-results/"+sys.argv[1]+"/*.xml"); cases=[case for path in files for case in ET.parse(path).iter("testcase")]; assert any(case.find("skipped") is None for case in cases), "No executed iOS test cases"' "$ios_test_target"
       - name: Explain lightweight completion
         if: ${{ !(needs.changes.outputs.source == 'true') }}
         run: echo 'No build is required for this event and scope.'
+      - name: Build native Kuikly receiver with real SDKs
+        if: needs.changes.outputs.source == 'true'
+        timeout-minutes: 20
+        run: |
+          python3 scripts/ci-run.py --log ci-diagnostics/native-kuikly-sdk.log -- bash -ec 'render_dir=$(bash scripts/ci-build-kuikly-render.sh "$RUNNER_TEMP/kuikly-native" GycJVerificationNative/Kuikly); python3 verification/swift-kuikly/verify-public-api.py "$render_dir"'
       - name: Warm trusted main Native cache
         if: (github.event_name == 'workflow_dispatch' && inputs.warm_native_cache && github.ref == 'refs/heads/main') && steps.konan.outputs.cache-hit != 'true'
         timeout-minutes: 40
