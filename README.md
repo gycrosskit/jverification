@@ -4,9 +4,9 @@
 
 ## 当前功能与平台边界
 
-core/client及三端driver/service提供隐私门控、初始化、预取号与Token授权；无CMP或Kuikly业务UI，jverification-kuikly源码提供Android/iOS/OHOS发送端与Native receiver，授权页为厂商SDK/宿主配置。
+core/client及三端driver/service提供隐私门控、初始化、预取号与Token授权；不提供业务页面 UI，jverification-kuikly源码提供Android/iOS/OHOS发送端与Native receiver，授权页为厂商SDK/宿主配置。
 
-2026-10-08 源码基线 `7a284e26b110876087b55adfa5a1b9d0afcd199c` （2026-10-08 当时仅更新文档，生产源码保持tag 0.1.4）；五入口功能矩阵、具体 OS/SDK 差异、宿主职责和验证边界见[功能与平台差异](docs/功能与平台差异.md)。下方历史版本记录只证明其注明版本与范围；当前安装示例使用 0.1.5，发布与远程结果以对应Release为准。
+2026-10-08 源码基线 `7a284e26b110876087b55adfa5a1b9d0afcd199c` （2026-10-08 当时仅更新文档，生产源码保持tag 0.1.4）；三端功能矩阵、具体 OS/SDK 差异、宿主职责和验证边界见[功能与平台差异](docs/功能与平台差异.md)。下方历史版本记录只证明其注明版本与范围；当前安装示例使用 0.1.5，发布与远程结果以对应Release为准。
 
 当前测试覆盖、执行时点和未验收项集中见[验证范围](docs/功能与平台差异.md#验证范围)，复现命令见[开发与验证](docs/开发与验证.md)。
 
@@ -187,7 +187,7 @@ when (result.status) {
 
 未同意时不初始化 SDK；一进程只配置一个 AppKey，并保持一个活动 SDK owner。关闭、超时或撤销同意使旧回调失效；撤销不能卸载厂商 SDK 或撤回已发送数据。Token 仅交后端换票，宿主不要记录它。
 
-Kotlin client、Swift 原生 client 和 OHOS service 的 `authenticate(true)` 均先初始化再授权；预取号可选，CMP 与 Kuikly 宿主沿用同一原生入口和结果合同。
+Kotlin client、Swift 原生 client 和 OHOS service 的 `authenticate(true)` 均先初始化再授权；预取号可选，原生与 Kuikly 宿主沿用同一入口和结果合同。
 
 ## 文档与支持
 
