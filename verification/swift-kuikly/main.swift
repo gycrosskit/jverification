@@ -82,3 +82,14 @@ precondition(firstReady == 1)
 consecutive.invalidate()
 // End ContextQueue boundary.
 print("Production JVerification Swift receiver: consent, opened/terminal, repeated invalidate, queued/factory races and dealloc cleanup passed (SDK/render boundaries stubbed)")
+
+JVerificationModule.clientFactory = { nil }
+let unavailable = JVerificationModule()
+var rejected = false
+unavailable.hrv_call(withMethod: "initialize", params: "{\"consentGranted\":true}") { value in
+    let result = value as! [String: Any]
+    precondition(result["status"] as? String == "UNSUPPORTED")
+    rejected = true
+}
+precondition(rejected, "Missing host configuration must return unsupported without creating SDK")
+unavailable.invalidate()

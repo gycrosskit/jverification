@@ -52,7 +52,7 @@ interface JVerificationDriver {
 }
 
 /**
- * 每个进程保持一个 client；状态与事件依赖宿主提供的串行 dispatcher，重入返回 BUSY。
+ * 每个生命周期 owner 持有一个 client；原生 driver 复用进程 SDK 并隔离 owner。状态与事件在宿主提供的串行 dispatcher 执行，重入返回 BUSY。
  * @param driver 本实例使用并在 close 时释放的原生驱动。
  * @param dispatcher 必须为 Main、单线程或 Kuikly 页面 dispatcher；不支持并发 Default/IO dispatcher，Android/iOS 默认 Main。
  * @param prepareTimeoutMillis 单次初始化/预取号超时，毫秒，默认 10000，必须为正数。
