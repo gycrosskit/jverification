@@ -1,5 +1,9 @@
 # GY CrossKit JVerification
 
+> 当前源码候选统一为 **1.0.0**：Maven（core/Kuikly）、iOS Pod 与 OHPM 使用同版；尚未发布，示例坐标须待发布后远程消费。本地验证使用显式源码/本地 HAR，Kuikly 基线为 2.29.1，真机与新版本远程消费另验。
+
+当前源码为未发布的 Kuikly 2.29.1 配套候选；带发布标签的说明保留历史范围。新增 API 必须消费配套源码，不能用旧远程版本验证代替。
+
 本版：Maven `0.1.5`、Git Pod `0.1.5`（内部 `0.1.5`），HAR 不变。新增 Android/iOS Kuikly Native Module receiver 与平台变体；已发布 Maven `0.1.4` 不包含此能力。iOS receiver 从可选 `GycJVerificationNative/Kuikly` Git Pod subspec 导出，默认 Native Pod 不自动依赖 Kuikly。具体发布与远程验收结果见[对应 Release](https://github.com/gycrosskit/jverification/releases/tag/0.1.5)。接线见[接入指南的 Native receiver](docs/接入指南.md#androidios-kuikly-native-receiver)。
 
 ## 当前功能与平台边界
@@ -21,7 +25,7 @@ core/client及三端driver/service提供隐私门控、初始化、预取号与T
 | 产物 | 平台 / 要求 |
 | --- | --- |
 | `jverification-core` | Android API 24+ / iOS 15+；共用协程 client、Android driver、iOS 闭包 driver |
-| `jverification-kuikly` | OHOS Kotlin Module；Kuikly `2.28.0-2.0.21-ohos` |
+| `jverification-kuikly` | OHOS Kotlin Module；Kuikly `2.29.1-2.0.21-ohos` |
 | `GycJVerificationNative` | iOS 15+ / Swift 5.9；独立 CocoaPods Git 源，供 Swift 或 KMP driver 使用 |
 | `@gycrosskit/jverification-native` | HarmonyOS API 22 兼容 HAR；原生服务及 Kuikly Renderer Module |
 
@@ -129,7 +133,7 @@ dependencyResolutionManagement {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("com.github.gycrosskit.jverification:jverification-core:0.1.5")
+            implementation("com.github.gycrosskit.jverification:jverification-core:1.0.0")
         }
     }
 }
@@ -141,11 +145,11 @@ kotlin {
 # iOS Podfile：未上传 CocoaPods Specs，使用 Git 源。
 pod 'GycJVerificationNative',
     :git => 'https://github.com/gycrosskit/jverification.git',
-    :tag => '0.1.5'
+    :tag => '1.0.0'
 ```
 
 ```sh
-ohpm install @gycrosskit/jverification-native@0.1.0
+ohpm install @gycrosskit/jverification-native@1.0.0
 ```
 
 本版 Maven、Git Tag 与 Podspec 内部版本均为 `0.1.5`，具体发布状态见对应 Release；旧0.1.1内部Pod版本0.1.0保持历史记录。各渠道分别版本化；插件仓库、iOS 闭包接线与 Kuikly 双侧注册见[接入指南](docs/接入指南.md)。

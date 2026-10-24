@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = 'GycJVerificationNative'
-  s.version = '0.1.5'
+  s.version = '1.0.0'
   s.summary = '极光一键认证 SDK 的同意、预取号、授权与释放边界'
   s.homepage = 'https://github.com/gycrosskit/jverification'
   s.license = { :type => 'Apache-2.0', :file => 'LICENSE' }
@@ -19,7 +19,7 @@ Pod::Spec.new do |s|
   end
   s.subspec 'Kuikly' do |kuikly|
     kuikly.dependency 'GycJVerificationNative/Native'
-    kuikly.dependency 'OpenKuiklyIOSRender', '2.28.0'
+    kuikly.dependency 'OpenKuiklyIOSRender', '2.29.1'
     kuikly.source_files = 'iosApp/Sources/GycJVerificationKuikly/*.swift'
   end
 end

@@ -5,7 +5,7 @@ import OpenKuiklyIOSRender
 @objc(GycJVerificationModule)
 public final class JVerificationModule: KRBaseModule {
     /// Main 配置 factory；返回配置了品牌、presenter、UI 和采集策略的页面 client，不在 JSON 传这些对象。
-    public static var clientFactory: (() -> JVerificationNativeClient)?
+    public static var clientFactory: (() -> JVerificationNativeClient?)?
     private var client: JVerificationNativeClient?
     private let lifecycleLock = NSLock()
     private var invalidated = false
