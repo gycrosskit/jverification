@@ -1,5 +1,7 @@
 # GY CrossKit JVerification
 
+当前开发分支的 Kuikly 与宿主统一：KMP 使用 `2.29.1-2.0.21-ohos`，iOS/OHOS Renderer 使用 `2.29.1`。以后随宿主同步升级；本次调整尚未发布，旧版本的接入与验收记录以对应 tag 为准。
+
 本版：Maven `0.1.5`、Git Pod `0.1.5`（内部 `0.1.5`），HAR 不变。新增 Android/iOS Kuikly Native Module receiver 与平台变体；已发布 Maven `0.1.4` 不包含此能力。iOS receiver 从可选 `GycJVerificationNative/Kuikly` Git Pod subspec 导出，默认 Native Pod 不自动依赖 Kuikly。具体发布与远程验收结果见[对应 Release](https://github.com/gycrosskit/jverification/releases/tag/0.1.5)。接线见[接入指南的 Native receiver](docs/接入指南.md#androidios-kuikly-native-receiver)。
 
 ## 当前功能与平台边界
