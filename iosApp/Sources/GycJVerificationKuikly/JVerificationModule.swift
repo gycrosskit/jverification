@@ -54,9 +54,11 @@ public final class JVerificationModule: KRBaseModule {
         if ["cancel", "clearCache", "close"].contains(method) {
             rejectQueuedDeliveries()
             generation += 1; pending = false
-            currentClient?.cancel()
-            if method == "clearCache" || method == "close" { consent = false; currentClient?.revokeConsent() }
-            if method == "close" { releaseClient() }
+            switch method {
+            case "cancel": currentClient?.cancel()
+            case "clearCache": consent = false; currentClient?.revokeConsent()
+            default: consent = false; releaseClient()
+            }
             return
         }
         guard ["initialize", "preLogin", "authenticate"].contains(method) else { deliver(["status": "UNSUPPORTED", "code": -13], callback: callback); return }

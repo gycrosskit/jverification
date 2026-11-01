@@ -1,11 +1,11 @@
 Pod::Spec.new do |s|
   s.name = 'GycJVerificationNative'
-  s.version = '1.0.0'
+  s.version = '1.0.1'
   s.summary = '极光一键认证 SDK 的同意、预取号、授权与释放边界'
   s.homepage = 'https://github.com/gycrosskit/jverification'
   s.license = { :type => 'Apache-2.0', :file => 'LICENSE' }
   s.author = 'GY CrossKit'
-  s.source = { :git => 'https://github.com/gycrosskit/jverification.git', :tag => s.version.to_s }
+  s.source = { :git => 'https://github.com/gycrosskit/jverification.git', :tag => "native-#{s.version}" }
   s.ios.deployment_target = '15.0'
   s.swift_version = '5.9'
   # 厂商 XCFramework 含静态库，组件不能作为动态 framework 传递链接它们。
@@ -19,7 +19,7 @@ Pod::Spec.new do |s|
   end
   s.subspec 'Kuikly' do |kuikly|
     kuikly.dependency 'GycJVerificationNative/Native'
-    kuikly.dependency 'OpenKuiklyIOSRender', '2.29.1'
+    kuikly.dependency 'OpenKuiklyIOSRender', '>= 2.29.1', '< 3.0'
     kuikly.source_files = 'iosApp/Sources/GycJVerificationKuikly/*.swift'
   end
 end

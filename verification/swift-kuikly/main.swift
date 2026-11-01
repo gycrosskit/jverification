@@ -80,6 +80,22 @@ _ = consecutive.hrv_call(withMethod: "cancel", params: "{}", callback: nil)
 KuiklyRenderThreadManager.paused = false; KuiklyRenderThreadManager.drain()
 precondition(firstReady == 1)
 consecutive.invalidate()
+// Each control operation uses the native client's single cleanup entry.
+for method in ["cancel", "clearCache", "close"] {
+    let cleanupNative = JVerificationNativeClient(), cleanupModule = JVerificationModule()
+    JVerificationModule.clientFactory = { cleanupNative }
+    var lateReplies = 0
+    _ = cleanupModule.hrv_call(withMethod: "authenticate", params: "{\"consentGranted\":true}", callback: { _ in lateReplies += 1 })
+    let lateReply = cleanupNative.reply!
+    _ = cleanupModule.hrv_call(withMethod: method, params: "{}", callback: nil)
+    precondition(cleanupNative.cancels == 1, "Control operation repeated cancellation: \(method)")
+    precondition(cleanupNative.revokes == (method == "cancel" ? 0 : 1))
+    precondition(cleanupNative.closes == (method == "close" ? 1 : 0))
+    lateReply(JVerificationReply(code: 6000, token: "late", carrier: nil))
+    precondition(lateReplies == 0)
+    cleanupModule.invalidate()
+    precondition(cleanupNative.closes == 1)
+}
 // End ContextQueue boundary.
 print("Production JVerification Swift receiver: consent, opened/terminal, repeated invalidate, queued/factory races and dealloc cleanup passed (SDK/render boundaries stubbed)")
 

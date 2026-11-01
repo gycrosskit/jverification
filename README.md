@@ -1,16 +1,14 @@
 # GY CrossKit JVerification
 
-> 当前源码候选统一为 **1.0.0**：Maven（core/Kuikly）、iOS Pod 与 OHPM 使用同版；尚未发布，示例坐标须待发布后远程消费。本地验证使用显式源码/本地 HAR，Kuikly 基线为 2.29.1，真机与新版本远程消费另验。
+Kuikly 由宿主统一选择版本；组件构建基线、允许范围及消费验证边界见[功能与平台差异](docs/功能与平台差异.md#kuikly-版本与宿主选择)。
 
-当前源码为未发布的 Kuikly 2.29.1 配套候选；带发布标签的说明保留历史范围。新增 API 必须消费配套源码，不能用旧远程版本验证代替。
-
-本版：Maven `0.1.5`、Git Pod `0.1.5`（内部 `0.1.5`），HAR 不变。新增 Android/iOS Kuikly Native Module receiver 与平台变体；已发布 Maven `0.1.4` 不包含此能力。iOS receiver 从可选 `GycJVerificationNative/Kuikly` Git Pod subspec 导出，默认 Native Pod 不自动依赖 Kuikly。具体发布与远程验收结果见[对应 Release](https://github.com/gycrosskit/jverification/releases/tag/0.1.5)。接线见[接入指南的 Native receiver](docs/接入指南.md#androidios-kuikly-native-receiver)。
+> 当前渠道版本：iOS Git Pod `native-1.0.1`、HAR `har-1.0.1`，Maven（core/Kuikly）保持 `1.0.0`。Kuikly 构建基线为 2.29.1，版本由宿主统一选择；渠道状态以精确 Release/Registry 及消费收据为准，真实运营商/授权页仍单独验收。
 
 ## 当前功能与平台边界
 
 core/client及三端driver/service提供隐私门控、初始化、预取号与Token授权；不提供业务页面 UI，jverification-kuikly源码提供Android/iOS/OHOS发送端与Native receiver，授权页为厂商SDK/宿主配置。
 
-2026-10-08 源码基线 `7a284e26b110876087b55adfa5a1b9d0afcd199c` （2026-10-08 当时仅更新文档，生产源码保持tag 0.1.4）；三端功能矩阵、具体 OS/SDK 差异、宿主职责和验证边界见[功能与平台差异](docs/功能与平台差异.md)。下方历史版本记录只证明其注明版本与范围；当前安装示例使用 0.1.5，发布与远程结果以对应Release为准。
+三端功能矩阵、具体 OS/SDK 差异、宿主职责和验证边界见[功能与平台差异](docs/功能与平台差异.md)。旧 `0.1.x` 记录仅证明其注明版本与范围，不代表当前源码。
 
 当前测试覆盖、执行时点和未验收项集中见[验证范围](docs/功能与平台差异.md#验证范围)，复现命令见[开发与验证](docs/开发与验证.md)。
 
@@ -145,14 +143,14 @@ kotlin {
 # iOS Podfile：未上传 CocoaPods Specs，使用 Git 源。
 pod 'GycJVerificationNative',
     :git => 'https://github.com/gycrosskit/jverification.git',
-    :tag => '1.0.0'
+    :tag => 'native-1.0.1'
 ```
 
 ```sh
-ohpm install @gycrosskit/jverification-native@1.0.0
+ohpm install @gycrosskit/jverification-native@1.0.1
 ```
 
-本版 Maven、Git Tag 与 Podspec 内部版本均为 `0.1.5`，具体发布状态见对应 Release；旧0.1.1内部Pod版本0.1.0保持历史记录。各渠道分别版本化；插件仓库、iOS 闭包接线与 Kuikly 双侧注册见[接入指南](docs/接入指南.md)。
+上面的 Maven 复用 `1.0.0`，Git Pod 与 OHPM 分别为 `native-1.0.1` 和 `1.0.1`；各渠道是否可消费分别核对对应 Release、Registry 与安装锁。插件仓库、iOS 闭包接线与 Kuikly 双侧注册见[接入指南](docs/接入指南.md)。
 
 ## 快速使用
 
