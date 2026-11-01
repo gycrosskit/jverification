@@ -1,5 +1,11 @@
 # 更新记录
 
+## Native 1.0.1 / HAR 1.0.1
+
+- iOS 清理去除重复 cancel/clearCache 调用，保留 owner、撤销同意、close 终态及迟到 Token 隔离。
+- Pod 改用独立 `native-1.0.1` Tag；Renderer Pod/HAR 由宿主选择 Kuikly 范围，Maven 复用 `1.0.0`。
+- Native/HAR 状态以精确 Release/Registry 及消费收据为准；不把编译或契约检查当作真实运营商验收。
+
 ## 1.0.0（未发布）
 
 - Maven、iOS Pod 与 OHPM 统一版本为 1.0.0；同仓模块使用同版，Kuikly 配套保持 2.29.1。
