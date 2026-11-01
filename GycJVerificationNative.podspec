@@ -19,7 +19,7 @@ Pod::Spec.new do |s|
   end
   s.subspec 'Kuikly' do |kuikly|
     kuikly.dependency 'GycJVerificationNative/Native'
-    kuikly.dependency 'OpenKuiklyIOSRender', '2.29.1'
+    kuikly.dependency 'OpenKuiklyIOSRender', '>= 2.29.1', '< 3.0'
     kuikly.source_files = 'iosApp/Sources/GycJVerificationKuikly/*.swift'
   end
 end
