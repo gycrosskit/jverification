@@ -1,6 +1,6 @@
 {
   "name": "@gycrosskit/jverification-native",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "极光一键认证原生服务及 Kuikly 桥接",
   "main": "Index.ets",
   "author": {
