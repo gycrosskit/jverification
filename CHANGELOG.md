@@ -1,5 +1,11 @@
 # 更新记录
 
+## 1.0.2（HAR 候选）
+
+- 补齐包内当前版本更新记录，修复 OHPM 提交时缺少当前版本 CHANGELOG 的拒绝。
+- 延续上一版组件能力及宿主可选的 Kuikly Renderer 范围；API、厂商依赖与生命周期行为不变。
+- 使用新不可变 HAR 版本，不覆盖旧标签或制品；构建、公开消费、审核与 Registry 安装分别验收，当前尚未发布。
+
 ## Native 1.0.1 / HAR 1.0.1
 
 - iOS 清理去除重复 cancel/clearCache 调用，保留 owner、撤销同意、close 终态及迟到 Token 隔离。
