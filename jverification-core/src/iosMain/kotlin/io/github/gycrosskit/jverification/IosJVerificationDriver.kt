@@ -22,7 +22,7 @@ class IosJVerificationDriver(
         val status = when {
             login && code == 6000 && !token.isNullOrBlank() -> VerificationStatus.TOKEN
             !login && code in listOf(0, 8000, 7000) -> VerificationStatus.READY
-            code in listOf(2000, 6001, 6002) -> VerificationStatus.CANCELED
+            code == 6002 -> VerificationStatus.CANCELED
             code == -10 -> VerificationStatus.CONSENT_REQUIRED
             code == -11 -> VerificationStatus.BUSY
             code == -12 -> VerificationStatus.CLOSED

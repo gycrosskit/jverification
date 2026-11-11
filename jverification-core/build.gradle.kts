@@ -26,6 +26,7 @@ kotlin {
             kotlin.srcDir(rootProject.file("jverification-kuikly/src/commonMain/kotlin"))
             // 以受控 Android/SDK 边界执行实际 driver，不复制其 owner/回调状态机。
             kotlin.srcDir("src/androidMain/kotlin")
+            kotlin.srcDir("src/iosMain/kotlin")
         }
         androidUnitTest.dependencies {
             implementation("org.robolectric:robolectric:4.16.1")
