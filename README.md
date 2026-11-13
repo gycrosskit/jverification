@@ -2,7 +2,7 @@
 
 Kuikly 由宿主统一选择版本；组件构建基线、允许范围及消费验证边界见[功能与平台差异](docs/功能与平台差异.md#kuikly-版本与宿主选择)。
 
-> 当前渠道版本：iOS Git Pod `native-1.0.1`、HAR 候选 `har-1.0.2`，Maven（core/Kuikly）保持 `1.0.0`。Kuikly 构建基线为 2.29.1，版本由宿主统一选择；渠道状态以精确 Release/Registry 及消费收据为准，真实运营商/授权页仍单独验收。
+> 当前渠道版本：iOS Git Pod [`native-1.0.2`](https://github.com/gycrosskit/jverification/tree/native-1.0.2)、HAR 候选 `har-1.0.2`，Maven（core/Kuikly）保持 `1.0.0`。Kuikly 构建基线为 2.29.1，版本由宿主统一选择；渠道状态以精确 Release/Registry 及消费收据为准，真实运营商/授权页仍单独验收。
 
 ## 当前功能与平台边界
 
@@ -143,14 +143,14 @@ kotlin {
 # iOS Podfile：未上传 CocoaPods Specs，使用 Git 源。
 pod 'GycJVerificationNative',
     :git => 'https://github.com/gycrosskit/jverification.git',
-    :tag => 'native-1.0.1'
+    :tag => 'native-1.0.2'
 ```
 
 ```sh
 ohpm install @gycrosskit/jverification-native@1.0.2
 ```
 
-上面的 Maven 复用 `1.0.0`，Git Pod 与 OHPM 分别为 `native-1.0.1` 和 `1.0.2`；各渠道是否可消费分别核对对应 Release、Registry 与安装锁。插件仓库、iOS 闭包接线与 Kuikly 双侧注册见[接入指南](docs/接入指南.md)。
+上面的 Maven 复用 `1.0.0`，Git Pod 与 OHPM 分别为 `native-1.0.2` 和 `1.0.2`；各渠道是否可消费分别核对对应 Release、Registry 与安装锁。插件仓库、iOS 闭包接线与 Kuikly 双侧注册见[接入指南](docs/接入指南.md)。
 
 ## 快速使用
 
