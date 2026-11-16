@@ -114,7 +114,7 @@ public final class JVerificationModule: KRBaseModule {
         if login && result.code == 6000 && result.token?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false { return "TOKEN" }
         if !login && [0, 8000, 7000].contains(result.code) { return "READY" }
         switch result.code {
-        case 2000, 6001, 6002: return "CANCELED"
+        case 6002: return "CANCELED"
         case -10: return "CONSENT_REQUIRED"
         case -11: return "BUSY"
         case -12: return "CLOSED"
