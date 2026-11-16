@@ -4,9 +4,9 @@ Kuikly 由宿主统一选择版本；组件构建基线、允许范围及消费�
 
 ## 渠道版本
 
-> iOS Git Pod `native-1.0.2` 和历史 HAR Release `1.0.2` 已存在；Maven（core/Kuikly）`1.0.2` 为未发布候选，当前 JitPack 稳定版本仍为 `1.0.0`。当前私 OHPM 尚无本包，需单独补齐 `1.0.2`；Harmony 后续仅发布到受信私仓，不再发布公网 Registry。沿用既有 Native Tag，不覆盖历史 Tag、制品或摘要。Kuikly 构建基线为 2.29.1，版本由宿主统一选择；真实运营商/授权页仍单独验收。
+> 本轮将 Maven、iOS Git Pod 与 Harmony 私 OHPM 统一到新版本 `1.0.3`，尚未完成发布和远程消费。保留 `1.0.2` 的 Tag、GitHub 资产及发布记录，不修改或删除 JitPack 的旧版本缓存；`1.0.2` 的 GitHub Maven 归档已发布，但 JitPack 当前仍返回 `tagNotFound`，两者不能混称已可消费。Harmony 仅发布到受信私仓。Kuikly 构建基线及厂商 SDK/API 均保持不变。
 
-本轮同时回流既有 `native-1.0.2` 的 iOS 错误码分类：`6001`、`2000` 从取消改为失败，仅 `6002` 为取消；原始厂商码和非 TOKEN 凭据丢弃规则保留。已公开 Native Tag 保持不变，不重复发布；厂商 SDK/API 版本不变。
+本轮仅更新版本声明和接入示例，业务行为与当前 `dev` 一致：保留已有 iOS `6001`、`2000` 为失败、仅 `6002` 为取消的分类；原始厂商码和非 TOKEN 凭据丢弃规则不变。Android/Harmony 行为不变。
 
 本地编译和打包调用项目入口，不上传或创建 Tag；正式发布统一使用新版 `component-ci/release`。日常 CI 不串联测试或独立消费者，宿主接入单独验收。
 
@@ -131,13 +131,13 @@ dependencyResolutionManagement {
 }
 ```
 
-共享模块 `build.gradle.kts`（`1.0.2` 为未发布候选；正式接入暂用 `1.0.0`）：
+共享模块 `build.gradle.kts`（`1.0.3` 为本轮候选，发布及远程验收完成后再接入）：
 
 ```kotlin
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("com.github.gycrosskit.jverification:jverification-core:1.0.2")
+            implementation("com.github.gycrosskit.jverification:jverification-core:1.0.3")
         }
     }
 }
@@ -149,14 +149,14 @@ kotlin {
 # iOS Podfile：未上传 CocoaPods Specs，使用 Git 源。
 pod 'GycJVerificationNative',
     :git => 'https://github.com/gycrosskit/jverification.git',
-    :tag => 'native-1.0.2'
+    :tag => 'native-1.0.3'
 ```
 
 ```sh
-ohpm install @gycrosskit/jverification-native@1.0.2
+ohpm install @gycrosskit/jverification-native@1.0.3
 ```
 
-上面的 Maven `1.0.2` 是候选坐标，发布并完成独立远程消费前继续使用已发布的 `1.0.0`；Git Pod 沿用既有 `native-1.0.2`，私 OHPM `1.0.2` 仍待本轮发布。插件仓库、iOS 闭包接线与 Kuikly 双侧注册见[接入指南](docs/接入指南.md)。
+上面的 Maven、Git Pod 与私 OHPM `1.0.3` 示例均为待发布候选；各渠道正式发布并完成独立远程消费前，不把源码声明当作可用制品。插件仓库、iOS 闭包接线与 Kuikly 双侧注册见[接入指南](docs/接入指南.md)。
 
 ## 快速使用
 

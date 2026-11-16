@@ -1,5 +1,5 @@
 plugins { alias(libs.plugins.kotlin.multiplatform); alias(libs.plugins.android.library) }
-val componentVersion = providers.gradleProperty("jverificationVersion").orElse("1.0.2").get()
+val componentVersion = providers.gradleProperty("jverificationVersion").orElse("1.0.3").get()
 val verifyNativeModule = providers.gradleProperty("verifyNativeModule").orElse("false").get().toBoolean()
 val kuiklyRenderFrameworkDir = providers.gradleProperty("kuiklyRenderFrameworkDir").orNull
 kotlin {

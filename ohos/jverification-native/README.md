@@ -9,5 +9,5 @@
 提供 GycJVerificationService 与 GycJVerificationModule，宿主接线参阅仓库根 README。
 
 ```sh
-ohpm install @gycrosskit/jverification-native@1.0.2
+ohpm install @gycrosskit/jverification-native@1.0.3
 ```
