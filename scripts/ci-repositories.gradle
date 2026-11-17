@@ -25,11 +25,9 @@ for (int attempt = 1; attempt <= 3; attempt++) {
     }
 }
 
-// GitHub-hosted runner 访问公开仓库；避免国内镜像 502 阻断 Gradle 的官方仓库解析。
 gradle.settingsEvaluated { settings ->
     [settings.pluginManagement.repositories, settings.dependencyResolutionManagement.repositories].each { repositories ->
-        repositories.removeAll { it instanceof org.gradle.api.artifacts.repositories.MavenArtifactRepository && it.url.host == 'maven.aliyun.com' }
-        // Eazytec 只有部分上游 classifier；普通 AGP/AAPT 等必须从官方仓库完整解析。
+        // Eazytec 仅解析定制 Kotlin；其余依赖沿用 settings 中声明的镜像和官方仓库。
         repositories.withType(org.gradle.api.artifacts.repositories.MavenArtifactRepository).matching { it.url.host == 'maven.eazytec-cloud.com' }.all {
             content { includeVersionByRegex('.*', '.*', '.*-(1\\.0\\.0|1\\.1\\.0-04)') }
         }
