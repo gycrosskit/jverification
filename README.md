@@ -2,7 +2,13 @@
 
 Kuikly 由宿主统一选择版本；组件构建基线、允许范围及消费验证边界见[功能与平台差异](docs/功能与平台差异.md#kuikly-版本与宿主选择)。
 
-> 当前渠道版本：iOS Git Pod [`native-1.0.2`](https://github.com/gycrosskit/jverification/tree/native-1.0.2)、HAR 候选 `har-1.0.2`，Maven（core/Kuikly）保持 `1.0.0`。Kuikly 构建基线为 2.29.1，版本由宿主统一选择；渠道状态以精确 Release/Registry 及消费收据为准，真实运营商/授权页仍单独验收。
+## 渠道版本
+
+> 本轮将 Maven、iOS Git Pod 与 Harmony 私 OHPM 统一到新版本 `1.0.3`，尚未完成发布和远程消费。保留 `1.0.2` 的 Tag、GitHub 资产及发布记录，不修改或删除 JitPack 的旧版本缓存；`1.0.2` 的 GitHub Maven 归档已发布，但 JitPack 当前仍返回 `tagNotFound`，两者不能混称已可消费。Harmony 仅发布到受信私仓。Kuikly 构建基线及厂商 SDK/API 均保持不变。
+
+本轮仅更新版本声明和接入示例，业务行为与当前 `dev` 一致：保留已有 iOS `6001`、`2000` 为失败、仅 `6002` 为取消的分类；原始厂商码和非 TOKEN 凭据丢弃规则不变。Android/Harmony 行为不变。
+
+本地编译和打包调用项目入口，不上传或创建 Tag；正式发布统一使用新版 `component-ci/release`。日常 CI 不串联测试或独立消费者，宿主接入单独验收。
 
 ## 当前功能与平台边界
 
@@ -27,7 +33,7 @@ core/client及三端driver/service提供隐私门控、初始化、预取号与T
 | `GycJVerificationNative` | iOS 15+ / Swift 5.9；独立 CocoaPods Git 源，供 Swift 或 KMP driver 使用 |
 | `@gycrosskit/jverification-native` | HarmonyOS API 22 兼容 HAR；原生服务及 Kuikly Renderer Module |
 
-KMP 工具链基线为 OpenHarmony Kotlin `2.2.21-1.0.0` / JDK 17 / Gradle 8.11.1 / AGP 8.10.1。Core 的 OHOS / JVM 变体仅提供公共能力，实际 SDK 驱动由 HAR / Kuikly 或宿主实现提供。
+KMP 工具链基线为 OpenHarmony Kotlin `2.2.21-1.0.0` / JDK 21 / Gradle 8.11.1 / AGP 8.10.1。Core 的 OHOS / JVM 变体仅提供公共能力，实际 SDK 驱动由 HAR / Kuikly 或宿主实现提供。
 
 厂商版本：Android JVerification `3.4.8` / JCore `5.5.6`，iOS JVerification `3.4.7` / JCore `5.5.1`，HarmonyOS `@jg/verify@1.2.2`。
 
@@ -125,13 +131,13 @@ dependencyResolutionManagement {
 }
 ```
 
-共享模块 `build.gradle.kts`：
+共享模块 `build.gradle.kts`（`1.0.3` 为本轮候选，发布及远程验收完成后再接入）：
 
 ```kotlin
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("com.github.gycrosskit.jverification:jverification-core:1.0.0")
+            implementation("com.github.gycrosskit.jverification:jverification-core:1.0.3")
         }
     }
 }
@@ -143,14 +149,14 @@ kotlin {
 # iOS Podfile：未上传 CocoaPods Specs，使用 Git 源。
 pod 'GycJVerificationNative',
     :git => 'https://github.com/gycrosskit/jverification.git',
-    :tag => 'native-1.0.2'
+    :tag => 'native-1.0.3'
 ```
 
 ```sh
-ohpm install @gycrosskit/jverification-native@1.0.2
+ohpm install @gycrosskit/jverification-native@1.0.3
 ```
 
-上面的 Maven 复用 `1.0.0`，Git Pod 与 OHPM 分别为 `native-1.0.2` 和 `1.0.2`；各渠道是否可消费分别核对对应 Release、Registry 与安装锁。插件仓库、iOS 闭包接线与 Kuikly 双侧注册见[接入指南](docs/接入指南.md)。
+上面的 Maven、Git Pod 与私 OHPM `1.0.3` 示例均为待发布候选；各渠道正式发布并完成独立远程消费前，不把源码声明当作可用制品。插件仓库、iOS 闭包接线与 Kuikly 双侧注册见[接入指南](docs/接入指南.md)。
 
 ## 快速使用
 

@@ -17,6 +17,13 @@ precondition(replies.count == 1 && replies[0]["event"] as? String == "opened")
 native.reply?(JVerificationReply(code: 6000, token: "token", carrier: nil))
 native.reply?(JVerificationReply(code: 6000, token: "late", carrier: nil)); native.opened?()
 precondition(replies.count == 2 && replies[1]["token"] as? String == "token")
+for (code, status) in [(6001, "FAILED"), (6002, "CANCELED"), (2000, "FAILED")] {
+    var result: [String: Any]?
+    _ = module.hrv_call(withMethod: "authenticate", params: "{\"consentGranted\":true}", callback: { result = $0 as? [String: Any] })
+    native.reply?(JVerificationReply(code: code, token: "secret", carrier: nil))
+    precondition(result?["status"] as? String == status && result?["code"] as? Int == code)
+    precondition(result?["token"] == nil)
+}
 _ = module.hrv_call(withMethod: "authenticate", params: "{\"consentGranted\":true}", callback: { replies.append($0 as! [String: Any]) })
 let late = native.reply!
 let semaphore = DispatchSemaphore(value: 0)
