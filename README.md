@@ -4,9 +4,9 @@ Kuikly 由宿主统一选择版本；组件构建基线、允许范围及消费�
 
 ## 渠道版本
 
-> 本轮将 Maven、iOS Git Pod 与 Harmony 私 OHPM 统一到新版本 `1.0.3`，尚未完成发布和远程消费。保留 `1.0.2` 的 Tag、GitHub 资产及发布记录，不修改或删除 JitPack 的旧版本缓存；`1.0.2` 的 GitHub Maven 归档已发布，但 JitPack 当前仍返回 `tagNotFound`，两者不能混称已可消费。Harmony 仅发布到受信私仓。Kuikly 构建基线及厂商 SDK/API 均保持不变。
+> 本轮候选统一为 `1.0.4`：Maven、iOS Git Pod 与 Harmony 私 OHPM 同版。保留 `1.0.3` 的 GitHub Maven 资产、Pod/OHPM、Tag 和 journal，不覆盖或重发旧版本；旧版 JitPack 分发的 Python 3.5 bootstrap 失败改在新版本修复。本轮复用已验收的来源、摘要与解包校验，元数据在项目打包时正规化，远程安装只校验并解包冻结制品。生产功能、iOS 错误码分类、厂商 SDK/API 和 Kuikly 基线不变。先本地验证，经独立 Maven 发布确认三公开资产后才首次请求新 JitPack；Maven 就绪后再发布 Pod 和私 OHPM，各渠道及宿主消费分别验收。
 
-本轮仅更新版本声明和接入示例，业务行为与当前 `dev` 一致：保留已有 iOS `6001`、`2000` 为失败、仅 `6002` 为取消的分类；原始厂商码和非 TOKEN 凭据丢弃规则不变。Android/Harmony 行为不变。
+本轮更新版本声明、接入示例与分发入口兼容，生产业务行为与当前 `dev` 一致：保留已有 iOS `6001`、`2000` 为失败、仅 `6002` 为取消的分类；原始厂商码和非 TOKEN 凭据丢弃规则不变。Android/Harmony 行为不变。
 
 本地编译和打包调用项目入口，不上传或创建 Tag；正式发布统一使用新版 `component-ci/release`。日常 CI 不串联测试或独立消费者，宿主接入单独验收。
 
@@ -131,13 +131,13 @@ dependencyResolutionManagement {
 }
 ```
 
-共享模块 `build.gradle.kts`（`1.0.3` 为本轮候选，发布及远程验收完成后再接入）：
+共享模块 `build.gradle.kts`（`1.0.4` 为本轮候选，发布及远程验收完成后再接入）：
 
 ```kotlin
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("com.github.gycrosskit.jverification:jverification-core:1.0.3")
+            implementation("com.github.gycrosskit.jverification:jverification-core:1.0.4")
         }
     }
 }
@@ -149,14 +149,14 @@ kotlin {
 # iOS Podfile：未上传 CocoaPods Specs，使用 Git 源。
 pod 'GycJVerificationNative',
     :git => 'https://github.com/gycrosskit/jverification.git',
-    :tag => 'native-1.0.3'
+    :tag => 'native-1.0.4'
 ```
 
 ```sh
-ohpm install @gycrosskit/jverification-native@1.0.3
+ohpm install @gycrosskit/jverification-native@1.0.4
 ```
 
-上面的 Maven、Git Pod 与私 OHPM `1.0.3` 示例均为待发布候选；各渠道正式发布并完成独立远程消费前，不把源码声明当作可用制品。插件仓库、iOS 闭包接线与 Kuikly 双侧注册见[接入指南](docs/接入指南.md)。
+上面的 Maven、Git Pod 与私 OHPM `1.0.4` 示例均为待发布候选；各渠道正式发布并完成独立远程消费前，不把源码声明当作可用制品。插件仓库、iOS 闭包接线与 Kuikly 双侧注册见[接入指南](docs/接入指南.md)。
 
 ## 快速使用
 
