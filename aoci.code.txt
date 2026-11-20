@@ -1,0 +1,202 @@
+#AOCI-CODE-VOLUME: 1
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/===
+.gitattributes[FC4T]: F:约束文本LF检出以稳定跨平台AOCI字节指纹 | R:- | A:- | S:-
+.gitignore[FC4T]: F:隔离Gradle、OHOS缓存与机器专属Codex配置 | R:- | A:- | S:Git忽略不能替代AOCI Scope中的机器路径排除
+AGENTS.md[SW8S]: F:约束认证同意、进程owner、迟回调和AOCI维护流程 | R:code:jverification-core/src/commonMain/kotlin/io/github/gycrosskit/jverification/JVerificationClient.kt | A:- | S:READY不能冒充TOKEN，opened不终结认证，close是终态；凭据和SDK content不进入日志或持久化
+CHANGELOG.md[SI5T]: F:记录认证组件版本、候选分发兼容与公开合同变化 | R:code:README.md | A:- | S:候选与历史发布按各自版本解释，渠道和设备分别验收
+GycJVerificationNative.podspec[FV8T]: F:发布iOS15原生认证及可选Kuikly receiver的静态Pod | R:code:iosApp/Sources/GycJVerificationNative/JVerificationClient.swift,code:iosApp/Sources/GycJVerificationKuikly/JVerificationModule.swift | A:GycJVerificationNative | S:厂商XCFramework含静态库，必须static_framework；Native固定SDK3.4.7/JCore5.5.1，Kuikly范围不保证所有版本兼容
+LICENSE[SG3M]: F:声明Apache2.0许可、分发义务与免责条款 | R:- | A:- | S:-
+README.md[SI8M]: F:概览三端认证core、driver、Kuikly桥与宿主安装和换票边界 | R:code:docs/功能与平台差异.md,code:docs/接入指南.md | A:- | S:组件只交付短期Token，AppKey、授权页配置和后端换票由宿主负责；候选分发不代验运营商设备业务
+build.gradle.kts[FV6T]: F:配置统一group、1.0.4默认版本和Maven许可证 | R:code:gradle/libs.versions.toml | A:- | S:原生Pod、OHPM与Maven按各自冻结渠道验收
+gradle.properties[FV4T]: F:配置Gradle内存、AndroidX和Native禁用目标处理 | R:- | A:- | S:-
+gradlew[EV4S]: F:在Unix解析Java环境并转发Gradle Wrapper调用 | R:code:gradle/wrapper/gradle-wrapper.properties | A:- | S:-
+gradlew.bat[EV4T]: F:在Windows解析Java环境并转发Wrapper参数与退出结果 | R:code:gradle/wrapper/gradle-wrapper.properties | A:- | S:-
+jitpack-install.sh[OV8T]: F:核对Release源码收据、归档摘要和解包边界后安装冻结Maven字节 | R:code:tests/test_jitpack_install.py | A:- | S:来源绑定HEAD SHA/tree，拒绝重复字段、软链、路径逃逸和过量解包
+jitpack-metadata.py[OV7T]: F:正规化classifier与空资源变体并更新module摘要 | R:code:scripts/package-maven.sh | A:normalize | S:只在冻结前执行，远程安装不再改写字节；非空资源在任何写入前拒绝
+jitpack.yml[FV5T]: F:指定JDK21并调用jverification冻结归档安装入口 | R:code:jitpack-install.sh | A:- | S:-
+release-pack.py[OV7T]: F:只归档指定版本的Maven publication并拒绝AppleDouble成员 | R:code:scripts/package-maven.sh | A:plain_file | S:不混入其他版本staging；归档后重开核对module JSON，完整发布验证另跑
+settings.gradle.kts[FV6T]: F:配置定制Kotlin和公共镜像并注册core与Kuikly两个模块 | R:code:build.gradle.kts | A:- | S:Kuikly独占腾讯仓读取module，Eazytec限定fork版本解析
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/docs/===
+功能与平台差异.md[SI8T]: F:维护三端SDK、同意门控、owner与结果分类及清理合同 | R:code:jverification-core/src/commonMain/kotlin/io/github/gycrosskit/jverification/JVerificationClient.kt | A:- | S:iOS6002才取消，6001/2000失败；真实SIM、授权页和后端换票不能由Mock或编译推断
+完整源码审查.md[SI6T]: F:保存历史全源码审查、Token空白修复及原生ABI与消费证据 | R:code:verification/结果.md | A:- | S:源码导航转由AOCI维护；历史候选与固定Tag证据不代验当前版本设备认证
+开发与验证.md[SV7T]: F:规定定向行为回归、真实SDK编译、独立消费与冻结分发验证入口 | R:code:verification/swift-callbacks/verify.sh,code:scripts/build.sh | A:- | S:Python3.5分发兼容不改变冻结字节，SDK/回调替身/设备业务分别留证
+接入指南.md[SI8S]: F:定义宿主同意、AppKey、原生工厂和三端Module生命周期接线 | R:code:iosApp/KmpJVerificationBridge.swift | A:- | S:一进程一AppKey和活动owner；页面先client.close再module.dispose；撤销不承诺卸载厂商SDK或撤回已发数据
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/gradle/===
+libs.versions.toml[FV6T]: F:集中固定Kotlin、AGP、Kuikly和协程版本及插件别名 | R:code:build.gradle.kts | A:- | S:Kuikly构建基线为2.29.1-ohos，宿主统一精确Renderer组合另验
+native-toolchain.properties[FV6T]: F:记录Kotlin Native版本、三端目标集合及revision | R:code:gradle/libs.versions.toml | A:- | S:缓存身份需包含revision，不能仅按Kotlin版本复用
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/gradle/wrapper/===
+gradle-wrapper.properties[FV5T]: F:固定Gradle8.11.1镜像与官方分发SHA256 | R:code:gradlew,code:gradlew.bat | A:- | S:镜像替换不升级工具链，摘要仍验证同版本官方字节
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/iosApp/===
+KmpJVerificationBridge.swift[II8T]: F:示例将Swift原生认证回调映射到宿主导出的Kotlin iOS driver闭包 | R:code:iosApp/Sources/GycJVerificationNative/JVerificationClient.swift | A:makeJVerificationDriver | S:import的Framework名由宿主替换；clearCache对应撤销同意，示例本身不纳入原生Pod
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/iosApp/Sources/GycJVerificationKuikly/===
+JVerificationModule.swift[II9S]: F:在Main串行接受Kuikly认证请求并在ContextQueue交付有效结果 | R:code:iosApp/Sources/GycJVerificationNative/JVerificationClient.swift | A:JVerificationModule,JVerificationModule.clientFactory,JVerificationModule.register | S:只接受真实JSON布尔同意；deliveryEpoch抑制取消/撤销/关闭后排队交付，下一合法请求不吞旧已接受结果；invalidate立即撤权且清理不retain析构对象
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/iosApp/Sources/GycJVerificationNative/===
+GycJVerificationNative.h[II7T]: F:公开Foundation与厂商JVERIFICATIONService头供静态Pod编译 | R:code:GycJVerificationNative.podspec | A:- | S:真实SDK头编译和App链接须独立验证，替身不能证明ABI
+JVerificationClient.swift[II9M]: F:管理Swift厂商SDK的同意、初始化等待、预取号和授权页Token终态 | R:code:iosApp/Sources/GycJVerificationKuikly/JVerificationModule.swift | A:JVerificationReply,JVerificationNativeClient | S:Main进程唯一owner且固定AppKey；generation隔离迟回调；opened只一次且继续等待；仅6000非空白Token交付，description脱敏；关闭只清所属资源
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/jverification-core/===
+build.gradle.kts[FV7T]: F:构建多端认证core并用JVM替身运行真实Android/iOS driver和Module回归 | R:code:jverification-core/src/commonMain/kotlin/io/github/gycrosskit/jverification/JVerificationClient.kt | A:- | S:Android公开API暴露SDK3.4.8，JCore内部依赖5.5.6；JVM/OHOS core不自带真实运营商driver
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/jverification-core/src/androidMain/===
+AndroidManifest.xml[FV3T]: F:为Android库提供空Manifest占位 | R:code:jverification-core/build.gradle.kts | A:- | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/jverification-core/src/androidMain/kotlin/io/github/gycrosskit/jverification/===
+AndroidJVerificationDriver.kt[II9S]: F:在Main管理Android厂商初始化、预取号、授权页和进程owner | R:code:jverification-core/src/commonMain/kotlin/io/github/gycrosskit/jverification/JVerificationClient.kt | A:AndroidJVerificationDriver | S:构造不init；同AppKey共享初始化但只交付当前waiter；只清本owner页/缓存；仅6000非空白凭据为TOKEN，6002取消；generation拒绝迟事件
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/jverification-core/src/androidUnitTest/kotlin/io/github/gycrosskit/jverification/kuikly/===
+AndroidJVerificationModuleTest.kt[TI8T]: F:以Robolectric验证receiver同意、Main工厂、一次终态和销毁隔离 | R:code:jverification-kuikly/src/androidMain/kotlin/io/github/gycrosskit/jverification/kuikly/AndroidJVerificationModule.kt | A:AndroidJVerificationModuleTest | S:factory内同步销毁必须关闭拒收driver且不init；替身不证明真实运营商认证
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/jverification-core/src/commonMain/kotlin/io/github/gycrosskit/jverification/===
+JVerificationClient.kt[LI9S]: F:定义认证结果与driver合同并串行管理同意、超时和取消终态 | R:code:jverification-core/src/androidMain/kotlin/io/github/gycrosskit/jverification/AndroidJVerificationDriver.kt | A:VerificationStatus,VerificationResult,JVerificationDriver,JVerificationClient | S:宿主提供串行dispatcher；READY不能当TOKEN；opened只一次且继续等待；撤销在回调后恢复前仍拒绝旧Token；close用NonCancellable完成清理
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/jverification-core/src/commonTest/kotlin/io/github/gycrosskit/jverification/===
+JVerificationClientTest.kt[TI9S]: F:验证同意、BUSY、超时、取消/撤销/关闭和迟Token及opened隔离 | R:code:jverification-core/src/commonMain/kotlin/io/github/gycrosskit/jverification/JVerificationClient.kt | A:JVerificationClientTest | S:执行实际client配替身driver；取消释放busy但旧attempt回调不得完成新请求
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/jverification-core/src/iosMain/kotlin/io/github/gycrosskit/jverification/===
+IosJVerificationDriver.kt[II9T]: F:通过宿主闭包连接Swift原生认证并映射厂商结果为公共状态 | R:code:iosApp/KmpJVerificationBridge.swift | A:IosJVerificationDriver | S:6002取消，6001/2000失败；只有6000非空白Token交付，其他结果丢弃凭据且保留原码
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/jverification-core/src/jvmTest/kotlin/android/app/===
+Activity.kt[TH4T]: F:为JVM真实Android driver回归提供Activity有效性替身 | R:code:jverification-core/src/jvmTest/kotlin/io/github/gycrosskit/jverification/AndroidJVerificationDriverTest.kt | A:Activity | S:仅替代平台边界，不证明Android运行时
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/jverification-core/src/jvmTest/kotlin/android/os/===
+Handler.kt[TW5T]: F:为JVM测试提供手动drain的Main消息队列 | R:code:jverification-core/src/jvmTest/kotlin/io/github/gycrosskit/jverification/AndroidJVerificationDriverTest.kt | A:Looper,Handler | S:myLooper固定Main，测试不能代验真实线程切换
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/jverification-core/src/jvmTest/kotlin/cn/jiguang/verifysdk/api/===
+SDK.kt[TI6T]: F:保存可控厂商回调及调用计数以测试生产Android driver | R:code:jverification-core/src/androidMain/kotlin/io/github/gycrosskit/jverification/AndroidJVerificationDriver.kt | A:JVerificationInterface,LoginSettings,AuthPageEventListener | S:只替代SDK IO，owner、generation与waiter逻辑仍来自生产文件
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/jverification-core/src/jvmTest/kotlin/com/tencent/kuikly/core/module/===
+Module.kt[TI5T]: F:为JVM测试截获Kuikly传输并保留可晚交付回调 | R:code:jverification-core/src/jvmTest/kotlin/io/github/gycrosskit/jverification/kuikly/JVerificationModuleTest.kt | A:Module | S:不复制生产生命周期状态机，不证明真实Renderer
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/jverification-core/src/jvmTest/kotlin/com/tencent/kuikly/core/nvi/serialization/json/===
+JSONObject.kt[TI4T]: F:为JVM桥测试提供最小字段容器替身 | R:code:jverification-core/src/jvmTest/kotlin/com/tencent/kuikly/core/module/Module.kt | A:JSONObject | S:toString为Map文本，不能代验真实JSON序列化
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/jverification-core/src/jvmTest/kotlin/io/github/gycrosskit/jverification/===
+AndroidJVerificationDriverTest.kt[TI9S]: F:执行真实driver验证进程owner转移、waiter、Activity和一次回调终态 | R:code:jverification-core/src/androidMain/kotlin/io/github/gycrosskit/jverification/AndroidJVerificationDriver.kt | A:AndroidJVerificationDriverTest | S:受控SDK边界不证明运营商；外国owner取消不得清本owner等待或授权页，同key重建仍复用在途init
+IosJVerificationDriverTest.kt[TI8T]: F:逐入口验证iOS6001/6002/2000分类、原码和非TOKEN凭据丢弃 | R:code:jverification-core/src/iosMain/kotlin/io/github/gycrosskit/jverification/IosJVerificationDriver.kt | A:IosJVerificationDriverTest | S:九组闭包回调不能代验真实iOS SDK业务
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/jverification-core/src/jvmTest/kotlin/io/github/gycrosskit/jverification/kuikly/===
+JVerificationModuleTest.kt[TI8T]: F:验证sender关闭幂等、空白Token拒绝和opened非终态 | R:code:jverification-kuikly/src/commonMain/kotlin/io/github/gycrosskit/jverification/kuikly/JVerificationModule.kt | A:JVerificationModuleTest | S:用传输替身保留迟回调，dispose后不能交付凭据或opened
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/jverification-kuikly/===
+build.gradle.kts[FV7T]: F:发布三端Kuikly sender与Android receiver并传递core和Renderer公开依赖 | R:code:jverification-kuikly/src/commonMain/kotlin/io/github/gycrosskit/jverification/kuikly/JVerificationModule.kt | A:- | S:原生工厂仍需宿主注册，声明平台变体不证明品牌设备认证
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/jverification-kuikly/src/androidMain/kotlin/io/github/gycrosskit/jverification/kuikly/===
+AndroidJVerificationModule.kt[II9T]: F:在Main分派Renderer认证请求并管理本页driver与回调generation | R:code:jverification-core/src/androidMain/kotlin/io/github/gycrosskit/jverification/AndroidJVerificationDriver.kt | A:AndroidJVerificationModule,registerJVerificationModule | S:严格布尔同意；factory可能同步销毁，拒收资源须关闭；取消先结束请求再按入口清缓存/关闭；destroyed立即阻断迟交付
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/jverification-kuikly/src/commonMain/kotlin/io/github/gycrosskit/jverification/kuikly/===
+JVerificationModule.kt[II9T]: F:将Kuikly页面调用转发到三端native receiver并保留opened持续回调 | R:code:jverification-kuikly/src/androidMain/kotlin/io/github/gycrosskit/jverification/kuikly/AndroidJVerificationModule.kt,code:iosApp/Sources/GycJVerificationKuikly/JVerificationModule.swift | A:JVerificationModule,JVerificationModule.NAME | S:须先经client同意门控；TOKEN空白转失败，终态才解绑；close与dispose只发一次关闭并清全部callback
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/ohos/AppScope/===
+app.json5[FV4T]: F:声明OHOS工程占位包身份、应用版本与资源引用 | R:code:ohos/build-profile.json5 | A:- | S:当前bundleName沿用toast占位，HAR包名应以oh-package声明为准
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/ohos/===
+build-profile.json5[FV6T]: F:登记API22的HarmonyOS默认产品与JVerificationNative模块 | R:code:ohos/jverification-native/build-profile.json5 | A:- | S:target和compatible均为6.0.2(22)，声明不等于设备验收
+hvigorfile.ts[EV4T]: F:将OHOS根工程交给官方appTasks | R:code:ohos/build-profile.json5 | A:- | S:-
+oh-package.json5[FV3T]: F:声明OHOS根工程模型和描述 | R:code:ohos/jverification-native/oh-package.json5 | A:- | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/ohos/hvigor/===
+hvigor-config.json5[FV3T]: F:固定Hvigor模型与执行日志配置入口 | R:code:ohos/hvigorfile.ts | A:- | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/ohos/jverification-native/===
+CHANGELOG.md[SI4T]: F:记录原生认证HAR候选版本与opened及同意能力历史 | R:code:ohos/jverification-native/README.md | A:- | S:候选准备与真实Registry发布按渠道回执分别判断
+Index.ets[EI7T]: F:导出原生认证服务、Module及厂商授权页配置类型 | R:code:ohos/jverification-native/src/main/ets/GycJVerificationService.ets | A:GycJVerificationService,GycVerificationReply,GycJVerificationModule,JVerifyUIConfig,JVerifyUIConfigBuilder | S:配置对象由宿主原生工厂提供，不经JSON传AppKey或UIContext
+LICENSE[SG3M]: F:随HAR分发Apache2.0授权与免责条款 | R:code:LICENSE | A:- | S:-
+README.md[SI6T]: F:说明Harmony认证包精确安装与固定Renderer基线 | R:code:README.md,code:docs/功能与平台差异.md | A:- | S:1.0.4为当前候选，安装示例不等于Registry已就绪
+build-profile.json5[FV4T]: F:为认证HAR声明stageMode默认构建目标 | R:code:ohos/build-profile.json5 | A:- | S:-
+hvigorfile.ts[EV4T]: F:为认证原生模块启用官方harTasks | R:code:ohos/jverification-native/build-profile.json5 | A:- | S:-
+oh-package.json5[FV7T]: F:声明原生认证1.0.4入口和精确厂商及Renderer依赖 | R:code:ohos/jverification-native/Index.ets | A:- | S:@jg/verify固定1.2.2，Renderer固定2.29.1，不能据文档范围静默升级
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/ohos/jverification-native/src/main/ets/===
+GycJVerificationModule.ets[II9T]: F:把带同意状态的Kuikly请求转交原生服务并按generation抑制迟回执 | R:code:ohos/jverification-native/src/main/ets/GycJVerificationService.ets | A:GycJVerificationModule | S:cancel/clearCache/close先推进generation；销毁关闭本页service，AppKey与UIContext只从原生工厂注入
+GycJVerificationService.ets[II9S]: F:管理Harmony厂商SDK同意、共享初始化、预取号及授权页唯一owner | R:code:ohos/jverification-native/src/main/ets/GycJVerificationModule.ets | A:GycJVerificationService,GycVerificationReply | S:初始化超时保留在途Promise防重复init；跨阶段generation校验；opened仅一次，6000非空白token才成功；撤销仅清所属页缓存，close不可复活
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/ohos/jverification-native/src/main/===
+module.json5[FV4T]: F:声明JVerificationNative为默认设备和平板HAR | R:code:ohos/jverification-native/build-profile.json5 | A:- | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/scripts/===
+build.sh[EV7T]: F:分派三端KMP生产编译、真实Swift Pod编译与Maven或HAR打包 | R:code:scripts/package-maven.sh,code:scripts/ci-build-kuikly-render.sh | A:- | S:日常compile不串联测试或独立消费，iOS编译实际Kuikly Pod，Harmony包含HAR
+check-public-maven.py[OV8M]: F:核对公开JitPack精确Tag、源码SHA、完整publication和实际字节 | R:code:verification/check-maven.py | A:audit,ready_state,validate_state,validate_component,check_sidecars | S:身份和摘要错即失败，缺失强摘要sidecar单列；只等待明确未就绪状态，首次精确POM可触发渠道构建
+ci-build-kuikly-render.sh[OV8T]: F:安装本地或固定Tag的原生Pod并编译核对真实Renderer和Module符号 | R:code:GycJVerificationNative.podspec | A:- | S:绝对输出目录且校验Pod/远程标识；构建当前主机架构，lipo和nm核验，stdout只返回Products目录
+ci-java.security[FV4T]: F:设置CI正DNS缓存一小时并禁负缓存 | R:- | A:- | S:不调整证书信任或网络业务超时
+ci-repositories.gradle[FV7T]: F:控制源码编译缓存、有限DNS预解析和定制Kotlin仓范围 | R:code:scripts/package-maven.sh | A:- | S:行为测试禁缓存与uptodate；DNS预解析失败不挡已有缓存，真实依赖解析仍决定结果
+package-maven.sh[OV7T]: F:以显式不可变版本构建Maven staging并正规化后冻结归档及摘要 | R:code:release-pack.py,code:jitpack-metadata.py | A:- | S:已有候选输出即拒绝，正规化在冻结前，安装后不能再修改验证字节
+verify-har.sh[TV7T]: F:使用真实OHOS工具链构建生产HAR及独立消费HAR | R:code:verification-ohos/consumer/oh-package.json5 | A:- | S:本地HAR构建与消费不证明私有Registry安装或设备认证
+verify-release.sh[OV8T]: F:从不可变远程Tag核对冻结归档与JitPack完整公开publication | R:code:jitpack-install.sh,code:scripts/check-public-maven.py | A:- | S:预期清单取自通过摘要校验的冻结归档，不从渠道自报反推，诊断结果保留
+verify.sh[TV6T]: F:编排广范围KMP回归、平台构建、OHOS行为和Pod lint维护检查 | R:code:scripts/verify-har.sh | A:- | S:不是每次修改必跑入口；SDK任务需走受控调度，各渠道消费与设备分别验收
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/tests/===
+test_jitpack_install.py[TV8S]: F:验证冻结认证Maven归档的来源、摘要和安全解包拒绝路径 | R:code:jitpack-install.sh | A:JitPackInstallTest | S:覆盖重复字段、篡改收据、特殊成员和目标软链逃逸，失败不安装
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/verification-consumer/===
+build.gradle.kts[TV8T]: F:构建固定版本Maven消费者并可选启用三端native receiver探针 | R:code:verification-consumer/settings.gradle.kts | A:- | S:verifyNativeModule默认false兼容旧Tag，开启后iOS链接真实Renderer Products；公开消费与本地staging分开
+gradle.properties[FV3T]: F:配置消费工程内存、UTF8、AndroidX和Native目标处理 | R:- | A:- | S:-
+settings.gradle.kts[TV7T]: F:按localArtifacts切换本地staging或JitPack并声明工具链镜像 | R:code:verification-consumer/build.gradle.kts | A:- | S:本地候选与远程模式互斥，不能把staging解析计为公开消费
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/verification-consumer/gradle/===
+libs.versions.toml[FV4T]: F:固定消费者Kotlin和AGP插件版本别名 | R:code:verification-consumer/build.gradle.kts | A:- | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/verification-consumer/src/androidMain/kotlin/===
+AndroidConsume.kt[TI5T]: F:编译验证Android driver和厂商UI配置的公开依赖闭包 | R:code:jverification-core/src/androidMain/kotlin/io/github/gycrosskit/jverification/AndroidJVerificationDriver.kt | A:driver | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/verification-consumer/src/commonMain/kotlin/===
+Consume.kt[TI6T]: F:通过公共client验证同意、opened签名和结果脱敏调用可用性 | R:code:jverification-core/src/commonMain/kotlin/io/github/gycrosskit/jverification/JVerificationClient.kt | A:verify,authenticate,redacted | S:编译探针不能证明实际认证或后端换票
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/verification-consumer/src/ohosArm64Main/kotlin/===
+OhosConsume.kt[TI5T]: F:从发布Kuikly模块构造符合Driver的OHOS sender | R:code:jverification-kuikly/src/commonMain/kotlin/io/github/gycrosskit/jverification/kuikly/JVerificationModule.kt | A:driver | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/verification-consumer/src/receiverAndroid/kotlin/===
+ReceiverProbe.kt[TI6T]: F:编译验证Android Renderer receiver工厂注册与真实SDK driver装配 | R:code:jverification-kuikly/src/androidMain/kotlin/io/github/gycrosskit/jverification/kuikly/AndroidJVerificationModule.kt | A:registerReceiver | S:仅verifyNativeModule启用，不给旧发布版本附加不存在的API
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/verification-consumer/src/receiverCommon/kotlin/===
+KuiklyProbe.kt[TI5T]: F:编译验证native receiver模式下公共Kuikly sender类型可导入 | R:code:verification-consumer/build.gradle.kts | A:kuiklyModuleProbe | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/verification-ohos/AppScope/===
+app.json5[FV3T]: F:声明OHOS独立消费工程占位应用身份与资源引用 | R:code:verification-ohos/build-profile.json5 | A:- | S:沿用toast占位身份，不作为认证应用登记依据
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/verification-ohos/===
+build-profile.json5[TV5T]: F:登记API22的JVerificationConsumer独立HAR消费目标 | R:code:verification-ohos/consumer/build-profile.json5 | A:- | S:-
+hvigorfile.ts[EV4T]: F:给OHOS独立消费根工程绑定appTasks | R:code:verification-ohos/build-profile.json5 | A:- | S:-
+oh-package.json5[FV3T]: F:声明OHOS独立消费根工程模型和描述 | R:code:verification-ohos/consumer/oh-package.json5 | A:- | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/verification-ohos/consumer/===
+Index.ets[TI6T]: F:从HAR公开入口构造service和Module并编译认证opened调用 | R:code:verification-ohos/consumer/oh-package.json5 | A:service,module,authenticate | S:UIContext和授权页配置由宿主注入，编译不执行运营商认证
+build-profile.json5[FV4T]: F:为独立认证HAR消费者声明stageMode目标 | R:code:verification-ohos/build-profile.json5 | A:- | S:-
+hvigorfile.ts[EV4T]: F:为独立消费模块启用官方harTasks | R:code:verification-ohos/consumer/build-profile.json5 | A:- | S:-
+oh-package.json5[TV6T]: F:将独立OHOS消费者绑定到本地构建的真实认证HAR文件 | R:code:verification-ohos/consumer/Index.ets | A:- | S:file依赖消费不证明私有Registry分发或远程安装
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/verification-ohos/consumer/src/main/===
+module.json5[FV3T]: F:声明JVerificationConsumer为默认设备和平板HAR | R:code:verification-ohos/consumer/build-profile.json5 | A:- | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/verification-ohos/hvigor/===
+hvigor-config.json5[FV3T]: F:固定独立消费工程Hvigor模型 | R:code:verification-ohos/hvigorfile.ts | A:- | S:-
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/verification/===
+check-maven.py[OV8S]: F:校验Maven publication清单、许可证、变体引用及实际摘要sidecar | R:code:scripts/verify-release.sh | A:check_sidecars,resolve_artifact | S:共享文件摘要只读一次但各variant独立核验；SNAPSHOT解析当前时间戳；此版本不检查JVM字节码上限
+ohos-behavior.cjs[TI8S]: F:对实际ArkTS service和Module转译执行同意、owner、opened顺序和失效回归 | R:code:ohos/jverification-native/src/main/ets/GycJVerificationService.ets,code:ohos/jverification-native/src/main/ets/GycJVerificationModule.ets | A:- | S:厂商SDK、定时器和Renderer由替身控制；验证竞态不代表真实SIM或授权页验收
+test-check-maven.py[TV7T]: F:用完整及八类损坏staging执行真实Maven校验器拒绝回归 | R:code:verification/check-maven.py | A:CheckerTest,stage | S:篡改后同步sidecar以隔离声明摘要、许可证、publication清单及跳转错误
+test-jitpack-metadata.py[TV7T]: F:用真实ZIP和module文件验证发布元数据裁剪的原子拒绝与摘要刷新 | R:code:jitpack-metadata.py | A:PublicationContracts | S:即使零字节真实资源也不得裁剪；损坏目标必须在任何正式写入前失败
+结果.md[SQ6T]: F:保存历史本地、mock、真实编译及远程渠道消费验收回执 | R:code:scripts/verify.sh,code:docs/完整源码审查.md | A:- | S:旧版本证据不代算本轮；编译和替身不证明SIM、厂商认证、设备页面或服务端换票
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/verification/ci/===
+test_cache_contract.py[TQ5T]: F:锁定CI只缓存源码编译且测试不走up-to-date和构建缓存 | R:code:scripts/ci-repositories.gradle | A:- | S:用文本断言验证Gradle策略声明，不证明任务实际运行
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/verification/swift-callbacks/===
+MocksSDK.swift[TI5T]: F:提供同步初始化和可控认证回包的极光Swift SDK测试边界 | R:code:verification/swift-callbacks/main.swift | A:JVERIFICATIONService | S:不调用真实SDK网络或授权页
+MocksUIKit.swift[TI3T]: F:提供带可见window的UIKit presenter最小测试类型 | R:code:verification/swift-callbacks/verify.sh | A:UIView,UIViewController | S:-
+main.swift[TI7T]: F:运行真实Swift原生client的初始化、同意重试、空白Token与迟到结果回归 | R:code:iosApp/Sources/GycJVerificationNative/JVerificationClient.swift,code:verification/swift-callbacks/MocksSDK.swift | A:- | S:RunLoop排空异步结果；BUSY和cancel须各只终结一次，description不得泄露Token
+verify.sh[TQ5T]: F:编译UIKit替身并链接生产Swift client执行认证回调回归 | R:code:verification/swift-callbacks/main.swift | A:- | S:SDK边界替身不等同于真实厂商编译或业务请求
+
+===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/verification/swift-kuikly/===
+MocksNative.swift[TI5T]: F:记录Swift receiver的主线程调用和原生认证清理次数 | R:code:verification/swift-kuikly/main.swift | A:JVerificationNativeClient | S:保存opened和终结闭包以主动模拟迟到事件
+MocksRender.swift[TI6T]: F:模拟Renderer销毁及可暂停ContextQueue以控制结果派发窗口 | R:code:verification/swift-kuikly/main.swift | A:KRBaseModule,KuiklyRenderThreadManager | S:deinit调用invalidate复现真实基类释放路径，队列暂停用于验证销毁和取消边界
+PublicAPI.swift[TI6T]: F:从独立Pod消费者导入并调用公开Swift receiver注册API | R:code:verification/swift-kuikly/verify-public-api.py | A:configureNativeReceiver | S:不编译receiver源码作为导入替代，不启动真实认证
+main.swift[TI8S]: F:验证生产Swift receiver的严格同意、终结去重、ContextQueue失效与释放竞态 | R:code:iosApp/Sources/GycJVerificationKuikly/JVerificationModule.swift,code:verification/swift-kuikly/MocksRender.swift,code:verification/swift-kuikly/MocksNative.swift | A:- | S:合法后续请求保留已接受READY；显式cancel或invalidate须抑制已排队结果；销毁清理不可保留自身
+verify-public-api.py[TQ6T]: F:对真实Simulator Pod产物typecheck独立receiver消费者 | R:code:verification/swift-kuikly/PublicAPI.swift | A:- | S:使用当前架构和真实SDK头文件搜索路径；只验证可见性与类型，不执行厂商认证
+verify.py[TQ6T]: F:编译Renderer替身并将生产Swift receiver与原生替身联结执行 | R:code:verification/swift-kuikly/main.swift | A:- | S:生产receiver参与行为回归，SDK和Renderer边界受控
