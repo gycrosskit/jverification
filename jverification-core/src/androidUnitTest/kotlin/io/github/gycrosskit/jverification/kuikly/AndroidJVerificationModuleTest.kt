@@ -18,14 +18,23 @@ import kotlin.test.*
 class AndroidJVerificationModuleTest {
     private class Driver : JVerificationDriver {
         var initialized = 0; var cancelled = 0; var closed = 0
+        var closeFailure: RuntimeException? = null
+        var clearFailure: RuntimeException? = null
         var result: ((VerificationResult) -> Unit)? = null
         var opened: (() -> Unit)? = null
         override fun initialize(callback: (VerificationResult) -> Unit) { assertMain(); initialized++; result = callback }
         override fun preLogin(callback: (VerificationResult) -> Unit) { assertMain(); result = callback }
         override fun authenticate(opened: () -> Unit, callback: (VerificationResult) -> Unit) { assertMain(); this.opened = opened; result = callback }
         override fun cancel() { assertMain(); cancelled++ }
-        override fun clearPreLoginCache() { assertMain() }
-        override fun close() { assertMain(); closed++ }
+        override fun clearPreLoginCache() {
+            assertMain()
+            clearFailure?.let { throw it }
+        }
+        override fun close() {
+            assertMain()
+            closed++
+            closeFailure?.let { throw it }
+        }
     }
     @Test fun consentFactoryMainAndNativeResultAreRequired() {
         val driver = Driver(); var factories = 0
@@ -85,6 +94,43 @@ class AndroidJVerificationModuleTest {
         thread { queued.call("initialize", "{\"consentGranted\":true}", null); queued.onDestroy() }.join()
         shadowOf(Looper.getMainLooper()).idle()
         assertEquals(0, created)
+    }
+
+    @Test fun closeFailureDoesNotEscapeMainOrRedeliverOldAuthorization() {
+        for (destroy in listOf(true, false)) {
+            val driver = Driver().apply { closeFailure = IllegalStateException("close failed") }
+            val module = AndroidJVerificationModule { driver }
+            var replies = 0
+            module.call("authenticate", "{\"consentGranted\":true}") { replies++ }
+
+            thread {
+                if (destroy) module.onDestroy() else module.call("close", "{}", null)
+            }.join()
+            shadowOf(Looper.getMainLooper()).idle()
+            driver.opened!!()
+            driver.result!!(VerificationResult(VerificationStatus.TOKEN, 6000, "old"))
+            module.onDestroy()
+
+            assertEquals(1, driver.closed)
+            assertEquals(0, replies)
+        }
+    }
+
+    @Test fun wireCloseStillClosesDriverWhenCacheClearFails() {
+        val driver = Driver().apply { clearFailure = IllegalStateException("cache clear failed") }
+        val module = AndroidJVerificationModule { driver }
+        var replies = 0
+        module.call("authenticate", "{\"consentGranted\":true}") { replies++ }
+
+        thread { module.call("close", "{}", null) }.join()
+        shadowOf(Looper.getMainLooper()).idle()
+        driver.opened!!()
+        driver.result!!(VerificationResult(VerificationStatus.TOKEN, 6000, "old"))
+        module.onDestroy()
+
+        assertEquals(1, driver.cancelled)
+        assertEquals(1, driver.closed)
+        assertEquals(0, replies)
     }
 }
 private fun assertMain() = assertEquals(Looper.getMainLooper(), Looper.myLooper())

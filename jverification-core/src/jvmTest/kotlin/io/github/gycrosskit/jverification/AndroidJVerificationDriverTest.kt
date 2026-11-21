@@ -4,6 +4,11 @@ import android.app.Activity
 import android.os.Looper
 import cn.jiguang.verifysdk.api.JVerificationInterface as SDK
 import cn.jiguang.verifysdk.api.JVerifyUIConfig
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -89,6 +94,90 @@ class AndroidJVerificationDriverTest {
             assertEquals(0, SDK.dismissCalls)
             owner.cancel(); assertEquals(1, SDK.dismissCalls)
         } finally { owner.close(); foreign.close(); Looper.drain() }
+    }
+
+    @Test
+    fun dismissFailureInvalidatesCallbacksAndDoesNotStrandSdkOwner() {
+        SDK.reset()
+        val owner = driver()
+        val replacement = driver()
+        val oldResults = mutableListOf<VerificationResult>()
+        val newResults = mutableListOf<VerificationResult>()
+        var oldOpened = 0
+        try {
+            owner.authenticate({ oldOpened++ }, oldResults::add)
+            val canceledEvent = SDK.settings!!.listener!!
+            val canceledResult = SDK.loginCallback!!
+            SDK.dismissFailure = IllegalStateException("dismiss failed")
+            owner.cancel()
+            canceledEvent.onEvent(2, null)
+            canceledResult(6000, "canceled", null, null)
+            owner.cancel()
+            assertEquals(1, SDK.dismissCalls)
+
+            owner.authenticate({ oldOpened++ }, oldResults::add)
+            val closedEvent = SDK.settings!!.listener!!
+            val closedResult = SDK.loginCallback!!
+            owner.close()
+            owner.close()
+            assertEquals(2, SDK.dismissCalls)
+            replacement.authenticate({}, newResults::add)
+            closedEvent.onEvent(2, null)
+            closedResult(6000, "closed", null, null)
+            SDK.loginCallback!!(6000, "current", null, null)
+            Looper.drain()
+
+            assertEquals(0, oldOpened)
+            assertEquals(emptyList(), oldResults)
+            assertEquals(3, SDK.loginCalls)
+            assertEquals("current", newResults.single().token)
+        } finally {
+            SDK.dismissFailure = null
+            owner.close()
+            replacement.close()
+            Looper.drain()
+        }
+    }
+
+    @Test
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun sdkCacheFailureBeforeAndDuringClientCloseStillReleasesOwner() = runTest {
+        SDK.reset()
+        SDK.initialized = true
+        val owner = driver()
+        val replacement = driver()
+        val client = JVerificationClient(owner, StandardTestDispatcher(testScheduler))
+        val newResults = mutableListOf<VerificationResult>()
+        var oldOpened = 0
+        try {
+            val pending = async { client.authenticate(true) { oldOpened++ } }
+            runCurrent()
+            val oldEvent = SDK.settings!!.listener!!
+            val oldResult = SDK.loginCallback!!
+            SDK.clearFailure = IllegalStateException("cache clear failed")
+
+            owner.cancel()
+            owner.clearPreLoginCache()
+            client.close()
+            client.close()
+            assertEquals(2, SDK.clearCalls)
+            assertEquals(VerificationStatus.CANCELED, pending.await().status)
+            assertEquals(VerificationStatus.CLOSED, client.authenticate(true).status)
+
+            replacement.authenticate({}, newResults::add)
+            assertEquals(2, SDK.loginCalls)
+            oldEvent.onEvent(2, null)
+            oldResult(6000, "closed", null, null)
+            SDK.loginCallback!!(6000, "current", null, null)
+            Looper.drain()
+            assertEquals(0, oldOpened)
+            assertEquals("current", newResults.single().token)
+        } finally {
+            SDK.clearFailure = null
+            owner.close()
+            replacement.close()
+            Looper.drain()
+        }
     }
 
     @Test

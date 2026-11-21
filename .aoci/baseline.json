@@ -1,7 +1,7 @@
 {
   "version": 1,
   "created_at": "2026-11-19T08:49:25Z",
-  "updated_at": "2026-11-19T09:14:22Z",
+  "updated_at": "2026-11-21T03:41:14Z",
   "files": {
     ".gitattributes": {
       "role": "index",
@@ -47,9 +47,9 @@
     },
     "aoci.code.txt": {
       "role": "index",
-      "sha256": "75cc3875fb3356b8f38320cbcb4d5b005dd34c5813870ffb7d39016b12476ed0",
-      "size": 31071,
-      "normalized_sha256": "75cc3875fb3356b8f38320cbcb4d5b005dd34c5813870ffb7d39016b12476ed0"
+      "sha256": "8fcd51399c30f7e0c7c962d5cad6ca248b74405e63eaed7989888c0a0f2e8b7a",
+      "size": 31739,
+      "normalized_sha256": "8fcd51399c30f7e0c7c962d5cad6ca248b74405e63eaed7989888c0a0f2e8b7a"
     },
     "aoci.meta.txt": {
       "role": "index",
@@ -71,9 +71,9 @@
     },
     "docs/功能与平台差异.md": {
       "role": "index",
-      "sha256": "1482b0b144325908772ba965d8428a34927657f05a8742063e6f8fa7509bbe0a",
-      "size": 12339,
-      "normalized_sha256": "1482b0b144325908772ba965d8428a34927657f05a8742063e6f8fa7509bbe0a"
+      "sha256": "c30708dde1940475a8ccb70403b8c7dd81d95d588710ded349dbeae87f2b5f49",
+      "size": 12539,
+      "normalized_sha256": "c30708dde1940475a8ccb70403b8c7dd81d95d588710ded349dbeae87f2b5f49"
     },
     "docs/完整源码审查.md": {
       "role": "index",
@@ -190,15 +190,15 @@
     },
     "jverification-core/src/androidMain/kotlin/io/github/gycrosskit/jverification/AndroidJVerificationDriver.kt": {
       "role": "index",
-      "sha256": "ead69fc91e7e05696840db7e14fdddfe5af446697a3c0e1bb3af2d5f4061de2d",
-      "size": 5824,
-      "normalized_sha256": "ead69fc91e7e05696840db7e14fdddfe5af446697a3c0e1bb3af2d5f4061de2d"
+      "sha256": "4fd9ba70d9b20042ae20832486d78dac28902110bed855684e626381ef4a074f",
+      "size": 6246,
+      "normalized_sha256": "4fd9ba70d9b20042ae20832486d78dac28902110bed855684e626381ef4a074f"
     },
     "jverification-core/src/androidUnitTest/kotlin/io/github/gycrosskit/jverification/kuikly/AndroidJVerificationModuleTest.kt": {
       "role": "index",
-      "sha256": "1ea7d57ffbeabfb2479d21e0cf298952a95077d88e0c32f74bbe12f1ac9ea4a4",
-      "size": 4966,
-      "normalized_sha256": "1ea7d57ffbeabfb2479d21e0cf298952a95077d88e0c32f74bbe12f1ac9ea4a4"
+      "sha256": "e585fd57570681626d75b115c382d8de0b8addde327d6eff657517a3ddb9f936",
+      "size": 6716,
+      "normalized_sha256": "e585fd57570681626d75b115c382d8de0b8addde327d6eff657517a3ddb9f936"
     },
     "jverification-core/src/commonMain/kotlin/io/github/gycrosskit/jverification/JVerificationClient.kt": {
       "role": "index",
@@ -232,9 +232,9 @@
     },
     "jverification-core/src/jvmTest/kotlin/cn/jiguang/verifysdk/api/SDK.kt": {
       "role": "index",
-      "sha256": "e0cc3ff1b0ed672806af7b2dd0bc2f54bd611a617926166e8820e449a3e019be",
-      "size": 2378,
-      "normalized_sha256": "e0cc3ff1b0ed672806af7b2dd0bc2f54bd611a617926166e8820e449a3e019be"
+      "sha256": "9451778d7f63074dfa6ab03505535bcb9d5fb4b0444263f6a5d713d7b1886b3d",
+      "size": 2636,
+      "normalized_sha256": "9451778d7f63074dfa6ab03505535bcb9d5fb4b0444263f6a5d713d7b1886b3d"
     },
     "jverification-core/src/jvmTest/kotlin/com/tencent/kuikly/core/module/Module.kt": {
       "role": "index",
@@ -250,9 +250,9 @@
     },
     "jverification-core/src/jvmTest/kotlin/io/github/gycrosskit/jverification/AndroidJVerificationDriverTest.kt": {
       "role": "index",
-      "sha256": "a19d0254ce2ec719844d113d4c980d45cc046effa1f9bde4667ad9a2f3c57747",
-      "size": 5581,
-      "normalized_sha256": "a19d0254ce2ec719844d113d4c980d45cc046effa1f9bde4667ad9a2f3c57747"
+      "sha256": "50eff08e3c40c3ac6fe06128cbca6e1596f2a604346959ad536bc2a15af6fe87",
+      "size": 9031,
+      "normalized_sha256": "50eff08e3c40c3ac6fe06128cbca6e1596f2a604346959ad536bc2a15af6fe87"
     },
     "jverification-core/src/jvmTest/kotlin/io/github/gycrosskit/jverification/IosJVerificationDriverTest.kt": {
       "role": "index",
@@ -274,9 +274,9 @@
     },
     "jverification-kuikly/src/androidMain/kotlin/io/github/gycrosskit/jverification/kuikly/AndroidJVerificationModule.kt": {
       "role": "index",
-      "sha256": "73b2ab1bbadc8fc8a13ce138aaa5d233ea404c7c15924d4b34dbbd3555a54902",
-      "size": 4942,
-      "normalized_sha256": "73b2ab1bbadc8fc8a13ce138aaa5d233ea404c7c15924d4b34dbbd3555a54902"
+      "sha256": "f22c889fdb651e2d63e2e473d9c4eac0b14dfc4abdeb1abeb1c5c83cefa33325",
+      "size": 5699,
+      "normalized_sha256": "f22c889fdb651e2d63e2e473d9c4eac0b14dfc4abdeb1abeb1c5c83cefa33325"
     },
     "jverification-kuikly/src/commonMain/kotlin/io/github/gycrosskit/jverification/kuikly/JVerificationModule.kt": {
       "role": "index",
