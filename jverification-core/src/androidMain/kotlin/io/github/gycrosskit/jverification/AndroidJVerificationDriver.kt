@@ -110,12 +110,32 @@ class AndroidJVerificationDriver(
     override fun cancel() {
         generation++
         if (owner === this) initWaiters.clear()
-        if (owner === this && loginActive) SDK.dismissLoginAuthActivity()
-        loginActive = false
+        try {
+            if (owner === this && loginActive) SDK.dismissLoginAuthActivity()
+        } catch (_: Exception) {
+            // 厂商关闭失败也不能中断取消或销毁。
+        } finally {
+            loginActive = false
+        }
     }
 
-    override fun clearPreLoginCache() { if (owner === this) SDK.clearPreLoginCache() }
-    override fun close() { cancel(); closed = true; if (owner === this) owner = null }
+    override fun clearPreLoginCache() {
+        if (owner !== this) return
+        try {
+            SDK.clearPreLoginCache()
+        } catch (_: Exception) {
+            // Renderer 可在关闭前单独派发清缓存；厂商异常不能中断后续关闭。
+        }
+    }
+
+    override fun close() {
+        closed = true
+        try {
+            cancel()
+        } finally {
+            if (owner === this) owner = null
+        }
+    }
 
     private companion object {
         var owner: AndroidJVerificationDriver? = null

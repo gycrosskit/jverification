@@ -20,7 +20,9 @@ object JVerificationInterface {
     var initCalls = 0
     var loginCalls = 0
     var dismissCalls = 0
+    var dismissFailure: RuntimeException? = null
     var clearCalls = 0
+    var clearFailure: RuntimeException? = null
     var initCallback: RequestCallback<String>? = null
     var preLoginCallback: ((Int, String?, String?) -> Unit)? = null
     var loginCallback: ((Int, String?, String?, String?) -> Unit)? = null
@@ -28,6 +30,8 @@ object JVerificationInterface {
     fun reset() {
         initialized = false; enabled = true
         initCalls = 0; loginCalls = 0; dismissCalls = 0; clearCalls = 0
+        dismissFailure = null
+        clearFailure = null
         initCallback = null; preLoginCallback = null; loginCallback = null; settings = null
     }
     fun isInitSuccess() = initialized
@@ -43,6 +47,12 @@ object JVerificationInterface {
                   callback: (Int, String?, String?, String?) -> Unit) {
         loginCalls++; settings = value; loginCallback = callback
     }
-    fun dismissLoginAuthActivity() { dismissCalls++ }
-    fun clearPreLoginCache() { clearCalls++ }
+    fun dismissLoginAuthActivity() {
+        dismissCalls++
+        dismissFailure?.let { throw it }
+    }
+    fun clearPreLoginCache() {
+        clearCalls++
+        clearFailure?.let { throw it }
+    }
 }
