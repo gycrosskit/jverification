@@ -19,7 +19,7 @@ release-pack.py[OV7T]: F:只归档指定版本的Maven publication并拒绝Apple
 settings.gradle.kts[FV6T]: F:配置定制Kotlin和公共镜像并注册core与Kuikly两个模块 | R:code:build.gradle.kts | A:- | S:Kuikly独占腾讯仓读取module，Eazytec限定fork版本解析
 
 ===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/docs/===
-功能与平台差异.md[SI8T]: F:维护三端SDK、同意门控、owner与结果分类及清理合同 | R:code:jverification-core/src/commonMain/kotlin/io/github/gycrosskit/jverification/JVerificationClient.kt | A:- | S:iOS6002才取消，6001/2000失败；真实SIM、授权页和后端换票不能由Mock或编译推断
+功能与平台差异.md[SI8T]: F:记录三端认证SDK、同意门控、owner、回执分类和退出清理约定 | R:code:jverification-core/src/commonMain/kotlin/io/github/gycrosskit/jverification/JVerificationClient.kt | A:- | S:Android driver就地处理厂商关闭和清缓存异常；Renderer先解除driver引用且前置清理失败仍关闭；iOS仅6002代表取消；替身及编译不代验运营商
 完整源码审查.md[SI6T]: F:保存历史全源码审查、Token空白修复及原生ABI与消费证据 | R:code:verification/结果.md | A:- | S:源码导航转由AOCI维护；历史候选与固定Tag证据不代验当前版本设备认证
 开发与验证.md[SV7T]: F:规定定向行为回归、真实SDK编译、独立消费与冻结分发验证入口 | R:code:verification/swift-callbacks/verify.sh,code:scripts/build.sh | A:- | S:Python3.5分发兼容不改变冻结字节，SDK/回调替身/设备业务分别留证
 接入指南.md[SI8S]: F:定义宿主同意、AppKey、原生工厂和三端Module生命周期接线 | R:code:iosApp/KmpJVerificationBridge.swift | A:- | S:一进程一AppKey和活动owner；页面先client.close再module.dispose；撤销不承诺卸载厂商SDK或撤回已发数据
@@ -48,10 +48,10 @@ build.gradle.kts[FV7T]: F:构建多端认证core并用JVM替身运行真实Andro
 AndroidManifest.xml[FV3T]: F:为Android库提供空Manifest占位 | R:code:jverification-core/build.gradle.kts | A:- | S:-
 
 ===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/jverification-core/src/androidMain/kotlin/io/github/gycrosskit/jverification/===
-AndroidJVerificationDriver.kt[II9S]: F:在Main管理Android厂商初始化、预取号、授权页和进程owner | R:code:jverification-core/src/commonMain/kotlin/io/github/gycrosskit/jverification/JVerificationClient.kt | A:AndroidJVerificationDriver | S:构造不init；同AppKey共享初始化但只交付当前waiter；只清本owner页/缓存；仅6000非空白凭据为TOKEN，6002取消；generation拒绝迟事件
+AndroidJVerificationDriver.kt[II9S]: F:在Main管理Android厂商SDK初始化、预取号、授权回执和进程owner | R:code:jverification-core/src/commonMain/kotlin/io/github/gycrosskit/jverification/JVerificationClient.kt | A:AndroidJVerificationDriver | S:构造不初始化；同AppKey共享SDK初始化且仅交付当前waiter；只有owner可以关闭厂商授权页和清缓存，二者的普通异常在驱动内收住；close释放owner；generation隔离迟到回调；仅6000非空白凭据为TOKEN，6002取消
 
 ===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/jverification-core/src/androidUnitTest/kotlin/io/github/gycrosskit/jverification/kuikly/===
-AndroidJVerificationModuleTest.kt[TI8T]: F:以Robolectric验证receiver同意、Main工厂、一次终态和销毁隔离 | R:code:jverification-kuikly/src/androidMain/kotlin/io/github/gycrosskit/jverification/kuikly/AndroidJVerificationModule.kt | A:AndroidJVerificationModuleTest | S:factory内同步销毁必须关闭拒收driver且不init；替身不证明真实运营商认证
+AndroidJVerificationModuleTest.kt[TI8S]: F:用Robolectric驱动真实Android receiver验证同意、Main派发和关闭故障隔离 | R:code:jverification-kuikly/src/androidMain/kotlin/io/github/gycrosskit/jverification/kuikly/AndroidJVerificationModule.kt | A:AndroidJVerificationModuleTest | S:在后台发起close再排空Main队列，清缓存或driver关闭失败时仍关闭一次且丢弃迟到opened和Token；factory内同步销毁必须关闭未采纳driver且不初始化SDK
 
 ===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/jverification-core/src/commonMain/kotlin/io/github/gycrosskit/jverification/===
 JVerificationClient.kt[LI9S]: F:定义认证结果与driver合同并串行管理同意、超时和取消终态 | R:code:jverification-core/src/androidMain/kotlin/io/github/gycrosskit/jverification/AndroidJVerificationDriver.kt | A:VerificationStatus,VerificationResult,JVerificationDriver,JVerificationClient | S:宿主提供串行dispatcher；READY不能当TOKEN；opened只一次且继续等待；撤销在回调后恢复前仍拒绝旧Token；close用NonCancellable完成清理
@@ -69,7 +69,7 @@ Activity.kt[TH4T]: F:为JVM真实Android driver回归提供Activity有效性替�
 Handler.kt[TW5T]: F:为JVM测试提供手动drain的Main消息队列 | R:code:jverification-core/src/jvmTest/kotlin/io/github/gycrosskit/jverification/AndroidJVerificationDriverTest.kt | A:Looper,Handler | S:myLooper固定Main，测试不能代验真实线程切换
 
 ===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/jverification-core/src/jvmTest/kotlin/cn/jiguang/verifysdk/api/===
-SDK.kt[TI6T]: F:保存可控厂商回调及调用计数以测试生产Android driver | R:code:jverification-core/src/androidMain/kotlin/io/github/gycrosskit/jverification/AndroidJVerificationDriver.kt | A:JVerificationInterface,LoginSettings,AuthPageEventListener | S:只替代SDK IO，owner、generation与waiter逻辑仍来自生产文件
+SDK.kt[TI6T]: F:保存可控的厂商回调及调用计数，并注入授权页关闭或预取号缓存清理异常 | R:code:jverification-core/src/androidMain/kotlin/io/github/gycrosskit/jverification/AndroidJVerificationDriver.kt | A:JVerificationInterface,LoginSettings,AuthPageEventListener | S:仅替代SDK调用，owner、generation和waiter逻辑来自生产driver；reset清除注入故障以隔离用例
 
 ===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/jverification-core/src/jvmTest/kotlin/com/tencent/kuikly/core/module/===
 Module.kt[TI5T]: F:为JVM测试截获Kuikly传输并保留可晚交付回调 | R:code:jverification-core/src/jvmTest/kotlin/io/github/gycrosskit/jverification/kuikly/JVerificationModuleTest.kt | A:Module | S:不复制生产生命周期状态机，不证明真实Renderer
@@ -78,7 +78,7 @@ Module.kt[TI5T]: F:为JVM测试截获Kuikly传输并保留可晚交付回调 | R
 JSONObject.kt[TI4T]: F:为JVM桥测试提供最小字段容器替身 | R:code:jverification-core/src/jvmTest/kotlin/com/tencent/kuikly/core/module/Module.kt | A:JSONObject | S:toString为Map文本，不能代验真实JSON序列化
 
 ===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/jverification-core/src/jvmTest/kotlin/io/github/gycrosskit/jverification/===
-AndroidJVerificationDriverTest.kt[TI9S]: F:执行真实driver验证进程owner转移、waiter、Activity和一次回调终态 | R:code:jverification-core/src/androidMain/kotlin/io/github/gycrosskit/jverification/AndroidJVerificationDriver.kt | A:AndroidJVerificationDriverTest | S:受控SDK边界不证明运营商；外国owner取消不得清本owner等待或授权页，同key重建仍复用在途init
+AndroidJVerificationDriverTest.kt[TI9S]: F:运行生产Android driver和共享client验证进程owner、回执终态和SDK清理异常 | R:code:jverification-core/src/androidMain/kotlin/io/github/gycrosskit/jverification/AndroidJVerificationDriver.kt,code:jverification-core/src/commonMain/kotlin/io/github/gycrosskit/jverification/JVerificationClient.kt | A:AndroidJVerificationDriverTest | S:注入SDK关闭授权页、独立清缓存及client.close时清缓存故障，旧opened与Token丢弃且下一driver可授权；同AppKey替换复用在途初始化，其他owner不能清理当前授权
 IosJVerificationDriverTest.kt[TI8T]: F:逐入口验证iOS6001/6002/2000分类、原码和非TOKEN凭据丢弃 | R:code:jverification-core/src/iosMain/kotlin/io/github/gycrosskit/jverification/IosJVerificationDriver.kt | A:IosJVerificationDriverTest | S:九组闭包回调不能代验真实iOS SDK业务
 
 ===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/jverification-core/src/jvmTest/kotlin/io/github/gycrosskit/jverification/kuikly/===
@@ -88,7 +88,7 @@ JVerificationModuleTest.kt[TI8T]: F:验证sender关闭幂等、空白Token拒绝
 build.gradle.kts[FV7T]: F:发布三端Kuikly sender与Android receiver并传递core和Renderer公开依赖 | R:code:jverification-kuikly/src/commonMain/kotlin/io/github/gycrosskit/jverification/kuikly/JVerificationModule.kt | A:- | S:原生工厂仍需宿主注册，声明平台变体不证明品牌设备认证
 
 ===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/jverification-kuikly/src/androidMain/kotlin/io/github/gycrosskit/jverification/kuikly/===
-AndroidJVerificationModule.kt[II9T]: F:在Main分派Renderer认证请求并管理本页driver与回调generation | R:code:jverification-core/src/androidMain/kotlin/io/github/gycrosskit/jverification/AndroidJVerificationDriver.kt | A:AndroidJVerificationModule,registerJVerificationModule | S:严格布尔同意；factory可能同步销毁，拒收资源须关闭；取消先结束请求再按入口清缓存/关闭；destroyed立即阻断迟交付
+AndroidJVerificationModule.kt[II9S]: F:在Main分派Renderer认证请求并隔离本页driver生命周期和native回执 | R:code:jverification-core/src/androidMain/kotlin/io/github/gycrosskit/jverification/AndroidJVerificationDriver.kt | A:AndroidJVerificationModule,registerJVerificationModule | S:同意只认布尔true；factory可同步销毁并须关闭未采纳driver；显式关闭先失效回执并解除driver引用，再按取消、清缓存、关闭顺序处理，前置清理失败仍执行关闭；销毁在排队清理前阻断迟交付
 
 ===/Users/guoyang/.codex/worktrees/aoci-jverification/jverification/jverification-kuikly/src/commonMain/kotlin/io/github/gycrosskit/jverification/kuikly/===
 JVerificationModule.kt[II9T]: F:将Kuikly页面调用转发到三端native receiver并保留opened持续回调 | R:code:jverification-kuikly/src/androidMain/kotlin/io/github/gycrosskit/jverification/kuikly/AndroidJVerificationModule.kt,code:iosApp/Sources/GycJVerificationKuikly/JVerificationModule.swift | A:JVerificationModule,JVerificationModule.NAME | S:须先经client同意门控；TOKEN空白转失败，终态才解绑；close与dispose只发一次关闭并清全部callback

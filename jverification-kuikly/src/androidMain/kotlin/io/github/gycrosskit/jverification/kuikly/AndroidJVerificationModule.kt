@@ -27,9 +27,14 @@ class AndroidJVerificationModule(private val driverFactory: () -> JVerificationD
             if (args == null) { callback?.invoke(reply(VerificationResult(VerificationStatus.FAILED, -1))); return@onMain }
             if (method in listOf("cancel", "clearCache", "close")) {
                 generation++; pending = false
-                driver?.cancel()
-                if (method == "clearCache" || method == "close") { consent = false; driver?.clearPreLoginCache() }
-                if (method == "close") { closed = true; driver?.close(); driver = null }
+                if (method == "close") {
+                    closed = true
+                    consent = false
+                    closeDriver(driver, clearCache = true)
+                } else {
+                    driver?.cancel()
+                    if (method == "clearCache") { consent = false; driver?.clearPreLoginCache() }
+                }
                 return@onMain
             }
             if (method !in listOf("initialize", "preLogin", "authenticate")) {
@@ -45,7 +50,7 @@ class AndroidJVerificationModule(private val driverFactory: () -> JVerificationD
             val native = driver ?: runCatching(driverFactory).getOrNull()
             // 宿主 factory 可同步销毁 Renderer；尚未交给本页的 driver 仍必须关闭。
             if (destroyed || closed) {
-                if (native !== driver) native?.close()
+                if (native !== driver) closeDriver(native)
                 return@onMain
             }
             if (native == null) { callback?.invoke(reply(VerificationResult(VerificationStatus.UNSUPPORTED))); return@onMain }
@@ -76,8 +81,27 @@ class AndroidJVerificationModule(private val driverFactory: () -> JVerificationD
 
     override fun onDestroy() {
         destroyed = true
-        onMain { generation++; pending = false; driver?.close(); driver = null }
+        onMain { generation++; pending = false; closeDriver(driver) }
         super.onDestroy()
+    }
+
+    private fun closeDriver(native: JVerificationDriver?, clearCache: Boolean = false) {
+        if (driver === native) driver = null
+        if (native == null) return
+        try {
+            if (clearCache) {
+                native.cancel()
+                native.clearPreLoginCache()
+            }
+        } catch (_: Exception) {
+            // 显式关闭时，取消或清缓存失败仍须关闭 driver。
+        } finally {
+            try {
+                native.close()
+            } catch (_: Exception) {
+                // 宿主 driver 的关闭异常在当前 Main 任务收住，页面已经失效。
+            }
+        }
     }
 
     private fun onMain(action: () -> Unit) {
